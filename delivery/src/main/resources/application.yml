@@ -1,0 +1,15 @@
+server:
+  address: 0.0.0.0
+  servlet:
+    contextPath: /konceptbuild
+  port: 8443
+
+spring:
+  datasource:
+    url: jdbc:postgresql://ep-mute-dream-abrymco2-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channelBinding=require
+    username: neondb_owner
+    password: npg_J2qDPxgVsE3Y
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
