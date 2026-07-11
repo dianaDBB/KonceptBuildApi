@@ -15,7 +15,7 @@ java -jar delivery/target/delivery-1.0.0-SNAPSHOT.jar
 ## Swagger
 
 - Local: http://localhost:8443/konceptbuild/swagger-ui/index.html#/
-- Release: https://budget-cemp.onrender.com/konceptbuild/swagger-ui/index.html
+- Release: https://konceptbuildapi.onrender.com/konceptbuild/swagger-ui/index.html
 
 ## Deploy
 
