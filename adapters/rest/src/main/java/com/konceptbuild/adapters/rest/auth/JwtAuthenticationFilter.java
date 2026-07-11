@@ -1,5 +1,6 @@
 package com.konceptbuild.adapters.rest.auth;
 
+import com.konceptbuild.core.TokenRevocationService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,9 +17,11 @@ import java.util.List;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
+    private final TokenRevocationService tokenRevocationService;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, TokenRevocationService tokenRevocationService) {
         this.jwtService = jwtService;
+        this.tokenRevocationService = tokenRevocationService;
     }
 
     @Override
@@ -32,7 +35,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            String subject = jwtService.getSubject(authorization.substring(7));
+            JwtService.TokenDetails token = jwtService.parse(authorization.substring(7));
+            if (tokenRevocationService.isRevoked(token.id())) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Bearer token has been logged out");
+                return;
+            }
+            String subject = token.subject();
             if (subject == null || subject.isBlank()) {
                 throw new JwtException("Token has no subject");
             }

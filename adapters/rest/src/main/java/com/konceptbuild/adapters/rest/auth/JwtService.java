@@ -13,6 +13,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -35,15 +36,23 @@ public class JwtService {
 
     public String createToken(String subject) {
         Instant now = clock.instant();
-        return Jwts.builder().subject(subject).issuedAt(Date.from(now)).expiration(Date.from(now.plus(TOKEN_EXPIRATION))).signWith(signingKey).compact();
+        return Jwts.builder().subject(subject).id(UUID.randomUUID().toString()).issuedAt(Date.from(now)).expiration(Date.from(now.plus(TOKEN_EXPIRATION))).signWith(signingKey).compact();
     }
 
     public String getSubject(String token) {
+        return parse(token).subject();
+    }
+
+    public TokenDetails parse(String token) {
         Claims claims = Jwts.parser().verifyWith(signingKey).build().parseSignedClaims(token).getPayload();
-        return claims.getSubject();
+        return new TokenDetails(claims.getSubject(), UUID.fromString(claims.getId()),
+                claims.getExpiration().toInstant());
     }
 
     public long getExpirationSeconds() {
         return TOKEN_EXPIRATION.toSeconds();
+    }
+
+    public record TokenDetails(String subject, UUID id, Instant expiresAt) {
     }
 }

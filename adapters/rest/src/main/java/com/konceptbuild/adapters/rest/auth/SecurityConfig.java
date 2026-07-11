@@ -2,6 +2,7 @@ package com.konceptbuild.adapters.rest.auth;
 
 import com.konceptbuild.core.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -28,8 +29,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint((request, response, exception) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication is required")).accessDeniedHandler((request, response, exception) -> response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access is denied")))
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll().requestMatchers("/worker/**").authenticated().requestMatchers("/user/**").authenticated().anyRequest().permitAll())
+                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint((request, response
+                        , exception) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication is " +
+                        "required")).accessDeniedHandler((request, response, exception) -> response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access is denied")))
+                .authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.POST, "/auth/login").permitAll().requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll().requestMatchers("/auth/**").authenticated().requestMatchers("/worker/**").authenticated().requestMatchers("/user/**").authenticated().anyRequest().permitAll())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

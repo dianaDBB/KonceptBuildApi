@@ -9,12 +9,6 @@ mvn clean package
 java -jar delivery/target/delivery-1.0.0-SNAPSHOT.jar
 ```
 
-If port `8443` is already in use, choose another port for this run:
-
-```sh
-SERVER_PORT=8080 java -jar delivery/target/delivery-1.0.0-SNAPSHOT.jar
-```
-
 - Or run `delivery/src/main/java/com/konceptbuild/KonceptBuildApiApplication.java` from your IDE with the repository
   root as its working directory.
 
