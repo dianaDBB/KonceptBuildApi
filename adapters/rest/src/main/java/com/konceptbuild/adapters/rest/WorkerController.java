@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,6 +18,7 @@ import java.util.List;
 @RestController
 @OpenAPIDefinition(info = @Info(title = "KonceptBuild API", version = "1.0"))
 @RequestMapping("/worker")
+@SecurityRequirement(name = "bearerAuth")
 public class WorkerController {
     @Autowired
     WorkerService workerService;
