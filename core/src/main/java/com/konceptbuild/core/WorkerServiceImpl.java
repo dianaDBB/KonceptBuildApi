@@ -22,11 +22,6 @@ public class WorkerServiceImpl implements WorkerService {
     private WorkerRepository workerRepository;
 
     @Override
-    public List<WorkerDto> getAll() {
-        return cacheServiceImpl.getAllWorkers();
-    }
-
-    @Override
     public List<WorkerDto> getAll(WorkerFilter filter) {
         Comparator<WorkerDto> comparator = comparatorFor(filter.sortBy());
         if (filter.sortDirection() == SortDirection.DESC) {
