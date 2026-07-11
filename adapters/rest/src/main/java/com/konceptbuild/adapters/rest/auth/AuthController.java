@@ -48,7 +48,7 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
         return new TokenResponse(jwtService.createToken(user.getUsername()), "Bearer",
-                jwtService.getExpirationSeconds());
+                jwtService.getExpirationSeconds(), user.getUsername());
     }
 
     @PostMapping("/logout")
@@ -64,6 +64,6 @@ public class AuthController {
     public record LoginRequest(@NotBlank String username, @NotBlank @Schema(format = "password") String password) {
     }
 
-    public record TokenResponse(String accessToken, String tokenType, long expiresIn) {
+    public record TokenResponse(String accessToken, String tokenType, long expiresIn, String username) {
     }
 }
