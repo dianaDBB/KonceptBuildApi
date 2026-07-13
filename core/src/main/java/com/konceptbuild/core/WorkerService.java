@@ -8,7 +8,7 @@ import java.util.List;
 
 @Component
 public interface WorkerService {
-    List<WorkerDto> getAll(WorkerFilter filter);
+    List<WorkerDto> search(WorkerFilter filter);
 
     void add(WorkerDto request);
 }

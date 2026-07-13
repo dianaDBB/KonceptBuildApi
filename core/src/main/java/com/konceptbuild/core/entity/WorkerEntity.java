@@ -1,10 +1,14 @@
 package com.konceptbuild.core.entity;
 
 import com.konceptbuild.core.dto.WorkerDto;
-import com.konceptbuild.core.dto.WorkerType;
+import com.konceptbuild.core.dto.WorkerStatus;
+import com.konceptbuild.core.dto.ContractType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -19,37 +23,75 @@ public class WorkerEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "name")
+    @Generated(GenerationTime.INSERT)
+    @Column(name = "code_number", nullable = false, unique = true, insertable = false, updatable = false)
+    private Integer codeNumber;
+
+    @Generated(GenerationTime.INSERT)
+    @Column(name = "code", nullable = false, unique = true, insertable = false, updatable = false)
+    private String code;
+
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "worker_type")
-    private WorkerType workerType;
+    @Column(name = "status", nullable = false)
+    private WorkerStatus status;
 
-    @Column(name = "hour_rate")
+    @Column(name = "contact", nullable = false)
+    private String contact;
+
+    @Column(name = "email", nullable = false)
+    private String email;
+
+    @Column(name = "function", nullable = false)
+    private String function;
+
+    @Column(name = "default_hours", precision = 10, scale = 1)
+    private Double defaultHours;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "contract_type", nullable = false)
+    private ContractType contractType;
+
+    @Column(name = "hour_rate", precision = 10, scale = 2)
     private Double hourRate;
 
-    @Column(name = "monthly_salary")
+    @Column(name = "monthly_salary", precision = 10, scale = 2)
     private Double monthlySalary;
 
-    @Column(name = "hour_cost")
-    private Double hourCost;
+    @Column(name = "tsu", precision = 10, scale = 2)
+    private Double tsu;
+
+    @Column(name = "meal_allowance", precision = 10, scale = 2)
+    private Double mealAllowance;
+
+    @Column(name = "accident_insurance", precision = 10, scale = 2)
+    private Double accidentInsurance;
+
+    @Column(name = "start_date", nullable = false)
+    private LocalDate startDate;
+
+    @Column(name = "end_date", nullable = false)
+    private LocalDate endDate;
 
     public WorkerEntity(WorkerDto dto) {
         this.id = dto.getId();
+        this.codeNumber = dto.getCodeNumber();
+        this.code = dto.getCode();
         this.name = dto.getName();
-        this.workerType = dto.getWorkerType();
+        this.status = dto.getStatus();
+        this.contact = dto.getContact();
+        this.email = dto.getEmail();
+        this.function = dto.getFunction();
+        this.defaultHours = dto.getDefaultHours();
+        this.contractType = dto.getContractType();
         this.hourRate = dto.getHourRate();
         this.monthlySalary = dto.getMonthlySalary();
-
-        this.hourCost = switch (dto.getWorkerType()) {
-            case WorkerType.CONTRACTOR -> dto.getHourRate() * 1.23;
-
-            case INTERNAL -> {
-                double ss = dto.getMonthlySalary() * 0.2375;
-                double monthlyCost = (dto.getMonthlySalary() * 14 / 12) + (ss * 14 / 12);
-                yield monthlyCost / 22 / 8;
-            }
-        };
+        this.tsu = dto.getTsu();
+        this.mealAllowance = dto.getMealAllowance();
+        this.accidentInsurance = dto.getAccidentInsurance();
+        this.startDate = dto.getStartDate();
+        this.endDate = dto.getEndDate();
     }
 }

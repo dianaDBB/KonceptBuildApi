@@ -1,6 +1,6 @@
 package com.konceptbuild.core.dto;
 
-public enum WorkerType {
+public enum ContractType {
     INTERNAL,
     CONTRACTOR
 }

@@ -1,10 +1,19 @@
 package com.konceptbuild.core.dto;
 
 public enum WorkerSortField {
-    ID,
+    CODE,
     NAME,
-    WORKER_TYPE,
+    STATUS,
+    CONTACT,
+    EMAIL,
+    FUNCTION,
+    DEFAULT_HOURS,
+    CONTRACT_TYPE,
     HOUR_RATE,
     MONTHLY_SALARY,
-    HOUR_COST
+    TSU,
+    MEAL_ALLOWANCE,
+    ACCIDENT_INSURANCE,
+    START_DATE,
+    END_DATE
 }

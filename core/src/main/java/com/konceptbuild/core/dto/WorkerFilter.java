@@ -1,35 +1,58 @@
 package com.konceptbuild.core.dto;
 
-import java.util.UUID;
+import java.time.LocalDate;
 
 public record WorkerFilter(
-        UUID id,
+        String code,
         String name,
-        WorkerType workerType,
-        Double minHourRate,
-        Double maxHourRate,
-        Double minMonthlySalary,
-        Double maxMonthlySalary,
-        Double minHourCost,
-        Double maxHourCost,
+        WorkerStatus status,
+        String contact,
+        String email,
+        String function,
+        Double defaultHoursMin,
+        Double defaultHoursMax,
+        ContractType contractType,
+        Double hourRateMin,
+        Double hourRateMax,
+        Double monthlySalaryMin,
+        Double monthlySalaryMax,
+        Double tsuMin,
+        Double tsuMax,
+        Double mealAllowanceMin,
+        Double mealAllowanceMax,
+        Double accidentInsuranceMin,
+        Double accidentInsuranceMax,
+        LocalDate startDateMin,
+        LocalDate startDateMax,
+        LocalDate endDateMin,
+        LocalDate endDateMax,
+
         WorkerSortField sortBy,
         SortDirection sortDirection) {
 
     public WorkerFilter {
         sortBy = sortBy == null ? WorkerSortField.NAME : sortBy;
         sortDirection = sortDirection == null ? SortDirection.ASC : sortDirection;
-        validateRange("hourRate", minHourRate, maxHourRate);
-        validateRange("monthlySalary", minMonthlySalary, maxMonthlySalary);
-        validateRange("hourCost", minHourCost, maxHourCost);
+
+        validateRange("defaultHours", defaultHoursMin, defaultHoursMax);
+        validateRange("hourRate", hourRateMin, hourRateMax);
+        validateRange("monthlySalary", monthlySalaryMin, monthlySalaryMax);
+        validateRange("tsu", tsuMin, tsuMax);
+        validateRange("mealAllowance", mealAllowanceMin, mealAllowanceMax);
+        validateRange("accidentInsurance", accidentInsuranceMin, accidentInsuranceMax);
+        validateRange("startDate", startDateMin, startDateMax);
+        validateRange("endDate", endDateMin, endDateMin);
     }
 
     private static void validateRange(String field, Double min, Double max) {
         if (min != null && max != null && min > max) {
-            throw new IllegalArgumentException("min" + capitalize(field) + " must not exceed max" + capitalize(field));
+            throw new IllegalArgumentException(field + " - MIN must not exceed MAX");
         }
     }
 
-    private static String capitalize(String value) {
-        return Character.toUpperCase(value.charAt(0)) + value.substring(1);
+    private static void validateRange(String field, LocalDate min, LocalDate max) {
+        if (min != null && max != null && min.isAfter(max)) {
+            throw new IllegalArgumentException(field + " - MIN must not exceed MAX");
+        }
     }
 }
