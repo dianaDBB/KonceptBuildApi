@@ -18,7 +18,7 @@ import java.util.UUID;
 @Service
 public class JwtService {
     private static final Logger log = LoggerFactory.getLogger(JwtService.class);
-    private static final Duration TOKEN_EXPIRATION = Duration.ofHours(1);
+    private static final Duration TOKEN_EXPIRATION = Duration.ofHours(10);
     private final SecretKey signingKey;
     private final Clock clock;
 

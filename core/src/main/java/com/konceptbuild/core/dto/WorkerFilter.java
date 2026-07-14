@@ -5,10 +5,13 @@ import java.time.LocalDate;
 public record WorkerFilter(
         String code,
         String name,
+        String nif,
         WorkerStatus status,
         String contact,
         String email,
         String function,
+        Double hourCostMin,
+        Double hourCostMax,
         Double defaultHoursMin,
         Double defaultHoursMax,
         ContractType contractType,
@@ -34,6 +37,7 @@ public record WorkerFilter(
         sortBy = sortBy == null ? WorkerSortField.NAME : sortBy;
         sortDirection = sortDirection == null ? SortDirection.ASC : sortDirection;
 
+        validateRange("hourCost", hourCostMin, hourCostMax);
         validateRange("defaultHours", defaultHoursMin, defaultHoursMax);
         validateRange("hourRate", hourRateMin, hourRateMax);
         validateRange("monthlySalary", monthlySalaryMin, monthlySalaryMax);

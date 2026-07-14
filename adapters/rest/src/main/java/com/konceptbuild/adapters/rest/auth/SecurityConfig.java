@@ -29,10 +29,24 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint((request, response
-                        , exception) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication is " +
-                        "required")).accessDeniedHandler((request, response, exception) -> response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access is denied")))
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers(HttpMethod.POST, "/auth/login").permitAll().requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll().requestMatchers("/auth/**").authenticated().requestMatchers("/worker/**").authenticated().requestMatchers("/user/**").authenticated().anyRequest().permitAll())
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint((request, response, exception) -> response
+                                .sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication is required"))
+                        .accessDeniedHandler((request, response, exception) -> response
+                                .sendError(HttpServletResponse.SC_FORBIDDEN, "Access is denied")))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.POST, "/auth/login")
+                        .permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                        .permitAll()
+                        .requestMatchers("/auth/**")
+                        .authenticated()
+                        .requestMatchers("/worker/**")
+                        .authenticated()
+                        .requestMatchers("/user/**")
+                        .authenticated()
+                        .anyRequest()
+                        .permitAll())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -44,6 +58,10 @@ public class SecurityConfig {
 
     @Bean
     UserDetailsService userDetailsService(UserService userService) {
-        return username -> userService.findActiveByUsername(username).map(user -> User.withUsername(user.getUsername()).password(user.getPasswordHash()).authorities("USER").build()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return username -> userService
+                .findActiveByUsername(username)
+                .map(user -> User.withUsername(user.getUsername()).password(user.getPasswordHash()).authorities("USER"
+                ).build())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }

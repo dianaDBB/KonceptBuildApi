@@ -1,13 +1,10 @@
 package com.konceptbuild.core;
 
-import com.konceptbuild.core.dto.WorkerDto;
-import com.konceptbuild.core.dto.WorkerFilter;
-import com.konceptbuild.core.dto.WorkerSortField;
-import com.konceptbuild.core.dto.SortDirection;
+import com.konceptbuild.core.dto.*;
 import com.konceptbuild.core.entity.WorkerEntity;
 import com.konceptbuild.core.repository.WorkerRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import com.konceptbuild.core.request.WorkerRequest;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.UUID;
 
 @Service
 public class WorkerServiceImpl implements WorkerService {
@@ -28,13 +26,22 @@ public class WorkerServiceImpl implements WorkerService {
     public List<WorkerDto> search(WorkerFilter filter) {
         Comparator<WorkerDto> comparator = comparatorFor(filter.sortBy(), filter.sortDirection());
 
+        // Keep inactive workers at the end, except when sorting by status.
+        if (filter.sortBy() != WorkerSortField.STATUS) {
+            comparator = Comparator
+                    .comparing((WorkerDto worker) -> worker.getStatus() == WorkerStatus.INACTIVE)
+                    .thenComparing(comparator);
+        }
+
         return cacheServiceImpl.getAllWorkers().stream()
                 .filter(worker -> matchesString(worker.getCode(), filter.code()))
                 .filter(worker -> matchesString(worker.getName(), filter.name()))
+                .filter(worker -> matchesString(worker.getNif(), filter.nif()))
                 .filter(worker -> filter.status() == null || filter.status() == worker.getStatus())
-                .filter(worker -> matchesString(worker.getContact(), filter.contact()))
+                .filter(worker -> matchesString(worker.getPhone(), filter.contact()))
                 .filter(worker -> matchesString(worker.getEmail(), filter.email()))
                 .filter(worker -> matchesString(worker.getFunction(), filter.function()))
+                .filter(worker -> isWithinRange(worker.getHourCost(), filter.hourCostMin(), filter.hourCostMax()))
                 .filter(worker -> isWithinRange(worker.getDefaultHours(), filter.defaultHoursMin(),
                         filter.defaultHoursMax()))
                 .filter(worker -> filter.contractType() == null || filter.contractType() == worker.getContractType())
@@ -83,14 +90,16 @@ public class WorkerServiceImpl implements WorkerService {
         return switch (field) {
             case CODE -> Comparator.comparing(WorkerDto::getCode, stringComparator);
             case NAME -> Comparator.comparing(WorkerDto::getName, stringComparator);
+            case NIF -> Comparator.comparing(WorkerDto::getNif, stringComparator);
             case STATUS -> Comparator.comparing(
                     WorkerDto::getStatus,
                     sortDirection == SortDirection.DESC
                             ? Comparator.nullsLast(Comparator.reverseOrder())
                             : Comparator.nullsLast(Comparator.naturalOrder()));
-            case CONTACT -> Comparator.comparing(WorkerDto::getContact, stringComparator);
+            case PHONE -> Comparator.comparing(WorkerDto::getPhone, stringComparator);
             case EMAIL -> Comparator.comparing(WorkerDto::getEmail, stringComparator);
             case FUNCTION -> Comparator.comparing(WorkerDto::getFunction, stringComparator);
+            case HOUR_COST -> Comparator.comparing(WorkerDto::getHourCost, doubleComparator);
             case DEFAULT_HOURS -> Comparator.comparing(WorkerDto::getDefaultHours, doubleComparator);
             case CONTRACT_TYPE -> Comparator.comparing(
                     WorkerDto::getContractType,
@@ -108,10 +117,37 @@ public class WorkerServiceImpl implements WorkerService {
     }
 
     @Override
-    public void add(WorkerDto request) {
-        WorkerEntity entity = new WorkerEntity(request);
+    public void add(WorkerRequest request) {
+        workerRepository.findByNif(request.nif())
+                .ifPresent(worker -> {
+                    String userIdentifier = request.name() + " | " + request.nif();
+                    throw new IllegalArgumentException("Worker already defined - " + userIdentifier);
+                });
 
+        WorkerEntity entity = new WorkerEntity(request);
         workerRepository.save(entity);
+        cacheServiceImpl.refreshCache();
+    }
+
+    @Override
+    public void update(WorkerRequest request) {
+        String userIdentifier = request.name() + " | " + request.nif() + " | " + request.id();
+        WorkerEntity currentEntity = workerRepository.findById(request.id())
+                .orElseThrow(() -> new EntityNotFoundException("Worker not found - " + userIdentifier));
+
+        WorkerEntity entity = new WorkerEntity(request);
+        entity.setCodeNumber(currentEntity.getCodeNumber());
+        entity.setCode(currentEntity.getCode());
+        workerRepository.save(entity);
+        cacheServiceImpl.refreshCache();
+    }
+
+    @Override
+    public void delete(UUID id) {
+        WorkerEntity entity = workerRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Worker with ID " + id + " not found"));
+
+        workerRepository.delete(entity);
         cacheServiceImpl.refreshCache();
     }
 }

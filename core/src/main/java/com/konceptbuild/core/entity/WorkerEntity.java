@@ -1,8 +1,8 @@
 package com.konceptbuild.core.entity;
 
-import com.konceptbuild.core.dto.WorkerDto;
 import com.konceptbuild.core.dto.WorkerStatus;
 import com.konceptbuild.core.dto.ContractType;
+import com.konceptbuild.core.request.WorkerRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Generated;
@@ -31,21 +31,30 @@ public class WorkerEntity {
     @Column(name = "code", nullable = false, unique = true, insertable = false, updatable = false)
     private String code;
 
-    @Column(name = "name", nullable = false, unique = true)
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "nif", nullable = false, unique = true)
+    private String nif;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private WorkerStatus status;
 
-    @Column(name = "contact", nullable = false)
-    private String contact;
+    @Column(name = "phone_country_code", nullable = false)
+    private String phoneCountryCode;
+
+    @Column(name = "phone", nullable = false)
+    private String phone;
 
     @Column(name = "email", nullable = false)
     private String email;
 
     @Column(name = "function", nullable = false)
     private String function;
+
+    @Column(name = "hour_cost", precision = 10, scale = 1)
+    private Double hourCost;
 
     @Column(name = "default_hours", precision = 10, scale = 1)
     private Double defaultHours;
@@ -54,7 +63,7 @@ public class WorkerEntity {
     @Column(name = "contract_type", nullable = false)
     private ContractType contractType;
 
-    @Column(name = "hour_rate", precision = 10, scale = 2)
+    @Column(name = "hour_rate", precision = 3, scale = 1)
     private Double hourRate;
 
     @Column(name = "monthly_salary", precision = 10, scale = 2)
@@ -75,23 +84,37 @@ public class WorkerEntity {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    public WorkerEntity(WorkerDto dto) {
-        this.id = dto.getId();
-        this.codeNumber = dto.getCodeNumber();
-        this.code = dto.getCode();
-        this.name = dto.getName();
-        this.status = dto.getStatus();
-        this.contact = dto.getContact();
-        this.email = dto.getEmail();
-        this.function = dto.getFunction();
-        this.defaultHours = dto.getDefaultHours();
-        this.contractType = dto.getContractType();
-        this.hourRate = dto.getHourRate();
-        this.monthlySalary = dto.getMonthlySalary();
-        this.tsu = dto.getTsu();
-        this.mealAllowance = dto.getMealAllowance();
-        this.accidentInsurance = dto.getAccidentInsurance();
-        this.startDate = dto.getStartDate();
-        this.endDate = dto.getEndDate();
+    public WorkerEntity(WorkerRequest request) {
+        this.id = request.id();
+        this.name = request.name();
+        this.nif = request.nif();
+        this.status = request.status();
+        this.phoneCountryCode = request.phoneCountryCode();
+        this.phone = request.phone();
+        this.email = request.email();
+        this.function = request.function();
+        this.defaultHours = request.defaultHours();
+        this.contractType = request.contractType();
+        this.hourRate = request.hourRate();
+        this.monthlySalary = request.monthlySalary();
+        this.tsu = request.tsu();
+        this.mealAllowance = request.mealAllowance();
+        this.accidentInsurance = request.accidentInsurance();
+        this.startDate = request.startDate();
+        this.endDate = request.endDate();
+
+        this.hourCost = switch (request.contractType()) {
+            case CONTRACTOR -> {
+                yield request.hourRate();
+            }
+
+            case INTERNAL -> {
+                var tsu = (request.monthlySalary() * (request.tsu() / 100)) * 14 / 12;
+                var mealAllowance = (request.mealAllowance() * 22) * 11 / 12;
+                var accidentInsurance = request.accidentInsurance();
+                var monthlyCost = (request.monthlySalary() * 14 / 12) + tsu + mealAllowance + accidentInsurance;
+                yield monthlyCost / 22 / request.defaultHours();
+            }
+        };
     }
 }
