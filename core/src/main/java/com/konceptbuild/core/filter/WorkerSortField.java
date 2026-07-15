@@ -1,4 +1,4 @@
-package com.konceptbuild.core.dto;
+package com.konceptbuild.core.filter;
 
 public enum WorkerSortField {
     CODE,

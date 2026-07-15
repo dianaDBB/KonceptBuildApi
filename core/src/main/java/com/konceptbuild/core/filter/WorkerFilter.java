@@ -1,4 +1,7 @@
-package com.konceptbuild.core.dto;
+package com.konceptbuild.core.filter;
+
+import com.konceptbuild.core.dto.WorkerContractType;
+import com.konceptbuild.core.dto.Status;
 
 import java.time.LocalDate;
 
@@ -6,15 +9,15 @@ public record WorkerFilter(
         String code,
         String name,
         String nif,
-        WorkerStatus status,
-        String contact,
+        Status status,
+        String phone,
         String email,
         String function,
         Double hourCostMin,
         Double hourCostMax,
         Double defaultHoursMin,
         Double defaultHoursMax,
-        ContractType contractType,
+        WorkerContractType workerContractType,
         Double hourRateMin,
         Double hourRateMax,
         Double monthlySalaryMin,

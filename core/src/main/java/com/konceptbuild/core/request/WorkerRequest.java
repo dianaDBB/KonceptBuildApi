@@ -1,7 +1,7 @@
 package com.konceptbuild.core.request;
 
-import com.konceptbuild.core.dto.ContractType;
-import com.konceptbuild.core.dto.WorkerStatus;
+import com.konceptbuild.core.dto.WorkerContractType;
+import com.konceptbuild.core.dto.Status;
 import com.konceptbuild.core.validator.ValidWorker;
 import jakarta.validation.constraints.*;
 
@@ -19,7 +19,7 @@ public record WorkerRequest(
         String nif,
 
         @NotNull(message = "Status is required")
-        WorkerStatus status,
+        Status status,
 
         @NotBlank(message = "Phone country code is required")
         @Pattern(
@@ -52,7 +52,7 @@ public record WorkerRequest(
         Double defaultHours,
 
         @NotNull(message = "ContactType is required")
-        ContractType contractType,
+        WorkerContractType workerContractType,
 
         Double hourRate,
         Double monthlySalary,

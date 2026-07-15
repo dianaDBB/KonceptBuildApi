@@ -2,6 +2,9 @@ package com.konceptbuild.core;
 
 import com.konceptbuild.core.dto.*;
 import com.konceptbuild.core.entity.WorkerEntity;
+import com.konceptbuild.core.filter.SortDirection;
+import com.konceptbuild.core.filter.WorkerFilter;
+import com.konceptbuild.core.filter.WorkerSortField;
 import com.konceptbuild.core.repository.WorkerRepository;
 import com.konceptbuild.core.request.WorkerRequest;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,7 +32,7 @@ public class WorkerServiceImpl implements WorkerService {
         // Keep inactive workers at the end, except when sorting by status.
         if (filter.sortBy() != WorkerSortField.STATUS) {
             comparator = Comparator
-                    .comparing((WorkerDto worker) -> worker.getStatus() == WorkerStatus.INACTIVE)
+                    .comparing((WorkerDto worker) -> worker.getStatus() == Status.INACTIVE)
                     .thenComparing(comparator);
         }
 
@@ -38,13 +41,13 @@ public class WorkerServiceImpl implements WorkerService {
                 .filter(worker -> matchesString(worker.getName(), filter.name()))
                 .filter(worker -> matchesString(worker.getNif(), filter.nif()))
                 .filter(worker -> filter.status() == null || filter.status() == worker.getStatus())
-                .filter(worker -> matchesString(worker.getPhone(), filter.contact()))
+                .filter(worker -> matchesString(worker.getPhone(), filter.phone()))
                 .filter(worker -> matchesString(worker.getEmail(), filter.email()))
                 .filter(worker -> matchesString(worker.getFunction(), filter.function()))
                 .filter(worker -> isWithinRange(worker.getHourCost(), filter.hourCostMin(), filter.hourCostMax()))
                 .filter(worker -> isWithinRange(worker.getDefaultHours(), filter.defaultHoursMin(),
                         filter.defaultHoursMax()))
-                .filter(worker -> filter.contractType() == null || filter.contractType() == worker.getContractType())
+                .filter(worker -> filter.workerContractType() == null || filter.workerContractType() == worker.getWorkerContractType())
                 .filter(worker -> isWithinRange(worker.getHourRate(), filter.hourRateMin(), filter.hourRateMax()))
                 .filter(worker -> isWithinRange(worker.getMonthlySalary(), filter.monthlySalaryMin(),
                         filter.monthlySalaryMax()))
@@ -102,7 +105,7 @@ public class WorkerServiceImpl implements WorkerService {
             case HOUR_COST -> Comparator.comparing(WorkerDto::getHourCost, doubleComparator);
             case DEFAULT_HOURS -> Comparator.comparing(WorkerDto::getDefaultHours, doubleComparator);
             case CONTRACT_TYPE -> Comparator.comparing(
-                    WorkerDto::getContractType,
+                    WorkerDto::getWorkerContractType,
                     sortDirection == SortDirection.DESC
                             ? Comparator.nullsLast(Comparator.reverseOrder())
                             : Comparator.nullsLast(Comparator.naturalOrder()));

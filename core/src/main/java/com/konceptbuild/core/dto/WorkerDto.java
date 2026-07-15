@@ -19,14 +19,14 @@ public class WorkerDto {
     private String code;
     private String name;
     private String nif;
-    private WorkerStatus status;
+    private Status status;
     private String phone;
     private String phoneCountryCode;
     private String email;
     private String function;
     private Double hourCost;
     private Double defaultHours;
-    private ContractType contractType;
+    private WorkerContractType workerContractType;
     private Double hourRate;
     private Double monthlySalary;
     private Double tsu;
@@ -48,7 +48,7 @@ public class WorkerDto {
         this.function = entity.getFunction();
         this.hourCost = entity.getHourCost();
         this.defaultHours = entity.getDefaultHours();
-        this.contractType = entity.getContractType();
+        this.workerContractType = entity.getWorkerContractType();
         this.hourRate = entity.getHourRate();
         this.monthlySalary = entity.getMonthlySalary();
         this.tsu = entity.getTsu();

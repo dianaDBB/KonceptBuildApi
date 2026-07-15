@@ -1,7 +1,7 @@
 package com.konceptbuild.core.entity;
 
-import com.konceptbuild.core.dto.WorkerStatus;
-import com.konceptbuild.core.dto.ContractType;
+import com.konceptbuild.core.dto.Status;
+import com.konceptbuild.core.dto.WorkerContractType;
 import com.konceptbuild.core.request.WorkerRequest;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,7 +39,7 @@ public class WorkerEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private WorkerStatus status;
+    private Status status;
 
     @Column(name = "phone_country_code", nullable = false)
     private String phoneCountryCode;
@@ -61,7 +61,7 @@ public class WorkerEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "contract_type", nullable = false)
-    private ContractType contractType;
+    private WorkerContractType workerContractType;
 
     @Column(name = "hour_rate", precision = 3, scale = 1)
     private Double hourRate;
@@ -94,7 +94,7 @@ public class WorkerEntity {
         this.email = request.email();
         this.function = request.function();
         this.defaultHours = request.defaultHours();
-        this.contractType = request.contractType();
+        this.workerContractType = request.workerContractType();
         this.hourRate = request.hourRate();
         this.monthlySalary = request.monthlySalary();
         this.tsu = request.tsu();
@@ -103,7 +103,7 @@ public class WorkerEntity {
         this.startDate = request.startDate();
         this.endDate = request.endDate();
 
-        this.hourCost = switch (request.contractType()) {
+        this.hourCost = switch (request.workerContractType()) {
             case CONTRACTOR -> {
                 yield request.hourRate();
             }

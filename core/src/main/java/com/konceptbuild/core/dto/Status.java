@@ -1,6 +1,6 @@
 package com.konceptbuild.core.dto;
 
-public enum WorkerStatus {
+public enum Status {
     ACTIVE,
     INACTIVE
 }

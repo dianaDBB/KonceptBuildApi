@@ -1,7 +1,7 @@
 package com.konceptbuild.core;
 
 import com.konceptbuild.core.dto.WorkerDto;
-import com.konceptbuild.core.dto.WorkerFilter;
+import com.konceptbuild.core.filter.WorkerFilter;
 import com.konceptbuild.core.request.WorkerRequest;
 import org.springframework.stereotype.Component;
 
