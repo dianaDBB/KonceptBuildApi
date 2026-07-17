@@ -1,6 +1,8 @@
 package com.konceptbuild.core.dto;
 
 import com.konceptbuild.core.entity.WorkerEntity;
+import com.konceptbuild.core.enums.Status;
+import com.konceptbuild.core.enums.WorkerContractType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

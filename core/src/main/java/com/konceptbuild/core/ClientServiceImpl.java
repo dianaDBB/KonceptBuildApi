@@ -1,6 +1,6 @@
 package com.konceptbuild.core;
 
-import com.konceptbuild.core.dto.Status;
+import com.konceptbuild.core.enums.Status;
 import com.konceptbuild.core.dto.ClientDto;
 import com.konceptbuild.core.entity.ClientEntity;
 import com.konceptbuild.core.filter.ClientSortField;

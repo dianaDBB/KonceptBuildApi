@@ -1,10 +1,13 @@
 package com.konceptbuild.core;
 
 import com.konceptbuild.core.dto.ClientDto;
+import com.konceptbuild.core.dto.WorkDto;
 import com.konceptbuild.core.dto.WorkerDto;
 import com.konceptbuild.core.entity.ClientEntity;
+import com.konceptbuild.core.entity.WorkEntity;
 import com.konceptbuild.core.entity.WorkerEntity;
 import com.konceptbuild.core.repository.ClientRepository;
+import com.konceptbuild.core.repository.WorkRepository;
 import com.konceptbuild.core.repository.WorkerRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,9 +32,14 @@ public class CacheServiceImpl implements CacheService {
     @Autowired
     private ClientRepository clientRepository;
 
+    @Autowired
+    private WorkRepository workRepository;
+
     private volatile List<WorkerDto> workers = List.of();
 
     private volatile List<ClientDto> clients = List.of();
+
+    private volatile List<WorkDto> works = List.of();
 
     @PostConstruct
     @EventListener(ApplicationReadyEvent.class)
@@ -43,6 +54,12 @@ public class CacheServiceImpl implements CacheService {
 
         List<ClientEntity> allClients = clientRepository.findAll(Sort.by(Sort.Direction.ASC, "companyName"));
         clients = allClients.stream().map(ClientDto::new).collect(Collectors.toList());
+
+        Map<UUID, ClientDto> clientsById = clients.stream()
+                .collect(Collectors.toMap(ClientDto::getId, Function.identity()));
+
+        List<WorkEntity> allWorks = workRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
+        works = allWorks.stream().map(work -> new WorkDto(work, clientsById.get(work.getClientId()))).toList();
     }
 
     @Override
@@ -53,5 +70,10 @@ public class CacheServiceImpl implements CacheService {
     @Override
     public List<ClientDto> getAllClients() {
         return new ArrayList<>(clients);
+    }
+
+    @Override
+    public List<WorkDto> getAllWorks() {
+        return new ArrayList<>(works);
     }
 }

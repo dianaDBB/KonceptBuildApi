@@ -1,6 +1,6 @@
 package com.konceptbuild.core.request;
 
-import com.konceptbuild.core.dto.Status;
+import com.konceptbuild.core.enums.Status;
 import com.konceptbuild.core.validator.ValidClient;
 import jakarta.validation.constraints.*;
 
@@ -10,7 +10,7 @@ import java.util.UUID;
 public record ClientRequest(
         UUID id,
 
-        @NotBlank(message = "Company companyName is required")
+        @NotBlank(message = "Company name is required")
         String companyName,
 
         String address,

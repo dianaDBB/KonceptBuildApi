@@ -2,6 +2,7 @@ package com.konceptbuild.core;
 
 import com.konceptbuild.core.dto.*;
 import com.konceptbuild.core.entity.WorkerEntity;
+import com.konceptbuild.core.enums.Status;
 import com.konceptbuild.core.filter.SortDirection;
 import com.konceptbuild.core.filter.WorkerFilter;
 import com.konceptbuild.core.filter.WorkerSortField;

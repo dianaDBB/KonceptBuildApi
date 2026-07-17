@@ -1,7 +1,7 @@
 package com.konceptbuild.core.entity;
 
-import com.konceptbuild.core.dto.Status;
-import com.konceptbuild.core.dto.WorkerContractType;
+import com.konceptbuild.core.enums.Status;
+import com.konceptbuild.core.enums.WorkerContractType;
 import com.konceptbuild.core.request.WorkerRequest;
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,4 +1,4 @@
-package com.konceptbuild.core.dto;
+package com.konceptbuild.core.enums;
 
 public enum Status {
     ACTIVE,

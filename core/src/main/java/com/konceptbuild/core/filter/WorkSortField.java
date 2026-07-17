@@ -1,0 +1,17 @@
+package com.konceptbuild.core.filter;
+
+public enum WorkSortField {
+    CODE,
+    NAME,
+    STATUS,
+    CONTRACTED_BUDGET,
+    ESTIMATED_COST,
+    ESTIMATED_COST_MATERIALS,
+    ESTIMATED_COST_LABOR,
+    ESTIMATED_MARGIN_EUR,
+    ESTIMATED_MARGIN_PERCENTUAL,
+    START_DATE,
+    ESTIMATED_END_DATE,
+    END_DATE,
+    CLIENT_NAME
+}

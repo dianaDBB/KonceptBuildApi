@@ -1,6 +1,7 @@
 package com.konceptbuild.core;
 
 import com.konceptbuild.core.dto.ClientDto;
+import com.konceptbuild.core.dto.WorkDto;
 import com.konceptbuild.core.dto.WorkerDto;
 import org.springframework.stereotype.Component;
 
@@ -13,4 +14,6 @@ public interface CacheService {
     List<WorkerDto> getAllWorkers();
 
     List<ClientDto> getAllClients();
+
+    List<WorkDto> getAllWorks();
 }

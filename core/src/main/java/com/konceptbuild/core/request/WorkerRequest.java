@@ -1,7 +1,7 @@
 package com.konceptbuild.core.request;
 
-import com.konceptbuild.core.dto.WorkerContractType;
-import com.konceptbuild.core.dto.Status;
+import com.konceptbuild.core.enums.WorkerContractType;
+import com.konceptbuild.core.enums.Status;
 import com.konceptbuild.core.validator.ValidWorker;
 import jakarta.validation.constraints.*;
 
