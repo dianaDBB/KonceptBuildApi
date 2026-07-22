@@ -55,6 +55,7 @@ public class WorkServiceImpl implements WorkService {
                 .filter(work -> isWithinRange(work.getEstimatedEndDate(), filter.estimatedEndDateMin(),
                         filter.estimatedEndDateMax()))
                 .filter(work -> isWithinRange(work.getEndDate(), filter.endDateMin(), filter.endDateMax()))
+                .filter(work -> matchesString(work.getClient().getCompanyName(), filter.clientName()))
                 .sorted(comparator)
                 .toList();
     }
