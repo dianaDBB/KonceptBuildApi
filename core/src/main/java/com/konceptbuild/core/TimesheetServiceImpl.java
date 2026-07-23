@@ -1,13 +1,9 @@
 package com.konceptbuild.core;
 
 import com.konceptbuild.core.dto.*;
-import com.konceptbuild.core.entity.TimesheetEntity;
-import com.konceptbuild.core.entity.TimesheetEntryEntity;
-import com.konceptbuild.core.entity.WorkEntity;
-import com.konceptbuild.core.entity.WorkerEntity;
+import com.konceptbuild.core.entity.*;
+import com.konceptbuild.core.enums.WorkerContractType;
 import com.konceptbuild.core.repository.TimesheetRepository;
-import com.konceptbuild.core.repository.WorkRepository;
-import com.konceptbuild.core.repository.WorkerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,16 +19,13 @@ public class TimesheetServiceImpl implements TimesheetService {
     private TimesheetRepository timesheetRepository;
 
     @Autowired
-    private WorkerRepository workerRepository;
-
-    @Autowired
-    private WorkRepository workRepository;
+    private CacheService cacheService;
 
     @Override
     @Transactional(readOnly = true)
     public MonthlyTimesheetDto getMonthlyTimesheet(Integer year, Integer month) {
 
-        List<WorkerEntity> workers = workerRepository.findAll();
+        List<WorkerDto> workers = cacheService.getAllWorkers();
         List<TimesheetEntity> timesheets = timesheetRepository.findByYearAndMonth(year, month);
 
         Map<UUID, TimesheetEntity> timesheetByWorker = new LinkedHashMap<>();
@@ -43,12 +36,12 @@ public class TimesheetServiceImpl implements TimesheetService {
 
         List<WorkerTimesheetDto> workerDtoList = new ArrayList<>();
 
-        for (WorkerEntity worker : workers) {
+        for (WorkerDto worker : workers) {
 
             TimesheetEntity timesheet = timesheetByWorker.get(worker.getId());
 
             WorkerTimesheetDto workerDto = WorkerTimesheetDto.builder()
-                    .worker(new WorkerDto(worker))
+                    .worker(worker)
                     .hourCost(worker.getHourRate())
                     .totalHours(0.0)
                     .totalCost(0.0)
@@ -57,7 +50,7 @@ public class TimesheetServiceImpl implements TimesheetService {
 
             if (timesheet != null) {
 
-                workerDto.setWorksTimesheet(buildWorks(timesheet));
+                workerDto.setWorksTimesheet(buildLines(timesheet));
 
                 double totalHours = workerDto.getWorksTimesheet().stream()
                         .flatMap(work -> work.getDays().stream())
@@ -65,7 +58,11 @@ public class TimesheetServiceImpl implements TimesheetService {
                         .sum();
 
                 workerDto.setTotalHours(totalHours);
-                workerDto.setTotalCost(totalHours * workerDto.getHourCost());
+
+                switch (workerDto.getWorker().getWorkerContractType()) {
+                    case WorkerContractType.INTERNAL -> workerDto.setTotalCost(workerDto.getWorker().getMonthlySalary());
+                    case WorkerContractType.CONTRACTOR -> workerDto.setTotalCost(totalHours * workerDto.getHourCost());
+                }
             }
 
             workerDtoList.add(workerDto);
@@ -80,41 +77,29 @@ public class TimesheetServiceImpl implements TimesheetService {
                 .build();
     }
 
-    private List<WorkTimesheetDto> buildWorks(TimesheetEntity timesheet) {
-
-        Map<WorkEntity, List<TimesheetEntryEntity>> entriesByWork = new LinkedHashMap<>();
-
-        for (TimesheetEntryEntity entry : timesheet.getEntries()) {
-            entriesByWork
-                    .computeIfAbsent(entry.getWork(), work -> new ArrayList<>())
-                    .add(entry);
-        }
+    private List<WorkTimesheetDto> buildLines(TimesheetEntity timesheet) {
 
         List<WorkTimesheetDto> works = new ArrayList<>();
 
-        for (Map.Entry<WorkEntity, List<TimesheetEntryEntity>> group : entriesByWork.entrySet()) {
+        for (TimesheetLineEntity line : timesheet.getLines()) {
 
-            WorkEntity work = group.getKey();
-
-            List<DayEntryDto> days = group.getValue()
+            List<DayEntryDto> days = line.getEntries()
                     .stream()
                     .sorted(Comparator.comparing(TimesheetEntryEntity::getDate))
                     .map(entry -> DayEntryDto.builder()
                             .date(entry.getDate())
-                            .hours(entry.getHours() == null ? null : entry.getHours())
-                            .attendanceCode(entry.getAttendanceCode())
+                            .hours(entry.getHours())
                             .build())
                     .toList();
 
             works.add(
                     WorkTimesheetDto.builder()
-                            .work(new WorkDto(work))
+                            .work(line.getWork() == null ? null : new WorkDto(line.getWork()))
+                            .attendanceCode(line.getAttendanceCode())
                             .days(days)
                             .build()
             );
         }
-
-        works.sort(Comparator.comparing(dto -> dto.getWork().getCodeNumber()));
 
         return works;
     }
@@ -124,8 +109,8 @@ public class TimesheetServiceImpl implements TimesheetService {
 
         for (WorkerTimesheetDto workerDto : dto.getWorkersTimesheet()) {
 
-            WorkerEntity worker = workerRepository.findById(workerDto.getWorker().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Worker not found: " + workerDto.getWorker().getCode()));
+            WorkerDto worker = cacheService.getWorker(workerDto.getWorker().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Worker not found: " + workerDto.getWorker().getId()));
 
             TimesheetEntity timesheet = timesheetRepository
                     .findByWorkerIdAndYearAndMonth(
@@ -134,36 +119,51 @@ public class TimesheetServiceImpl implements TimesheetService {
                             dto.getMonth())
                     .orElseGet(() -> {
                         TimesheetEntity entity = new TimesheetEntity();
-                        entity.setWorker(worker);
+                        entity.setWorker(new WorkerEntity(worker));
                         entity.setYear(dto.getYear());
                         entity.setMonth(dto.getMonth());
-                        entity.setEntries(new ArrayList<>());
+                        entity.setLines(new ArrayList<>());
                         return entity;
                     });
 
-            timesheet.getEntries().clear();
+            timesheet.getLines().clear();
 
             for (WorkTimesheetDto workDto : workerDto.getWorksTimesheet()) {
 
-                WorkEntity work = workRepository.findById(workDto.getWork().getId())
-                        .orElseThrow(() -> new IllegalArgumentException("Work not found: " + workDto.getWork().getCode()));
+                TimesheetLineEntity line = new TimesheetLineEntity();
+                line.setTimesheet(timesheet);
+
+                if (workDto.getWork() != null) {
+
+                    WorkDto work = cacheService.getWork(workDto.getWork().getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Work not found: " + workDto.getWork().getId()));
+
+                    line.setWork(new WorkEntity(work));
+
+                } else {
+
+                    line.setAttendanceCode(workDto.getAttendanceCode());
+
+                }
+
+                line.setEntries(new ArrayList<>());
 
                 for (DayEntryDto dayDto : workDto.getDays()) {
-                    if (dayDto.getHours() == null && dayDto.getAttendanceCode() == null) {
+
+                    if (dayDto.getHours() == null) {
                         continue;
                     }
 
                     TimesheetEntryEntity entry = new TimesheetEntryEntity();
-                    entry.setTimesheet(timesheet);
-                    entry.setWork(work);
-                    entry.setDate(dayDto.getDate());
-                    entry.setHours(dayDto.getHours() == null
-                            ? null
-                            : dayDto.getHours());
-                    entry.setAttendanceCode(dayDto.getAttendanceCode());
 
-                    timesheet.getEntries().add(entry);
+                    entry.setLine(line);
+                    entry.setDate(dayDto.getDate());
+                    entry.setHours(dayDto.getHours());
+
+                    line.getEntries().add(entry);
                 }
+
+                timesheet.getLines().add(line);
             }
 
             timesheetRepository.save(timesheet);

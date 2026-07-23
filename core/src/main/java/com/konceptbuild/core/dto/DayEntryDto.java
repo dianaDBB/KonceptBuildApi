@@ -1,6 +1,5 @@
 package com.konceptbuild.core.dto;
 
-import com.konceptbuild.core.enums.AttendanceCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +14,4 @@ import java.time.LocalDate;
 public class DayEntryDto {
     private LocalDate date;
     private Double hours;
-    private AttendanceCode attendanceCode;
 }

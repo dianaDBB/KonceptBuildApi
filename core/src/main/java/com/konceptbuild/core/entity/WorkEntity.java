@@ -1,5 +1,6 @@
 package com.konceptbuild.core.entity;
 
+import com.konceptbuild.core.dto.WorkDto;
 import com.konceptbuild.core.enums.WorkStatus;
 import com.konceptbuild.core.request.WorkRequest;
 import jakarta.persistence.*;
@@ -58,6 +59,18 @@ public class WorkEntity {
     @Column(name = "client_id")
     private UUID clientId;
 
+    public WorkEntity(WorkDto dto) {
+        this.id = dto.getId();
+        this.name = dto.getName();
+        this.status = dto.getStatus();
+        this.contractedBudget = dto.getContractedBudget();
+        this.estimatedCostMaterials = dto.getEstimatedCostMaterials();
+        this.estimatedCostLabor = dto.getEstimatedCostLabor();
+        this.startDate = dto.getStartDate();
+        this.estimatedEndDate = dto.getEstimatedEndDate();
+        this.endDate = dto.getEndDate();
+        this.clientId = dto.getClient().getId();
+    }
 
     public WorkEntity(WorkRequest request) {
         this.id = request.id();

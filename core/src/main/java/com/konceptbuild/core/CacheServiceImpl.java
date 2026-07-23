@@ -16,10 +16,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -68,6 +65,13 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
+    public Optional<WorkerDto> getWorker(UUID id) {
+        return this.getAllWorkers().stream()
+                .filter(w -> w.getId().equals(id))
+                .findFirst();
+    }
+
+    @Override
     public List<ClientDto> getAllClients() {
         return new ArrayList<>(clients);
     }
@@ -75,5 +79,12 @@ public class CacheServiceImpl implements CacheService {
     @Override
     public List<WorkDto> getAllWorks() {
         return new ArrayList<>(works);
+    }
+
+    @Override
+    public Optional<WorkDto> getWork(UUID id) {
+        return this.getAllWorks().stream()
+                .filter(w -> w.getId().equals(id))
+                .findFirst();
     }
 }

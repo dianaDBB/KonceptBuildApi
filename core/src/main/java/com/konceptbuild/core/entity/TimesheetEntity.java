@@ -3,7 +3,6 @@ package com.konceptbuild.core.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +28,10 @@ public class TimesheetEntity {
     @Column(name = "month", nullable = false)
     private int month;
 
-    @OneToMany(mappedBy = "timesheet", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("date ASC")
-    private List<TimesheetEntryEntity> entries = new ArrayList<>();
+    @OneToMany(
+            mappedBy = "timesheet",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<TimesheetLineEntity> lines;
 }

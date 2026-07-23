@@ -1,5 +1,6 @@
 package com.konceptbuild.core.dto;
 
+import com.konceptbuild.core.enums.AttendanceCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkTimesheetDto {
-    private WorkDto work;
-    private List<DayEntryDto> days;
+    WorkDto work;
+    AttendanceCode attendanceCode;
+    List<DayEntryDto> days;
 }

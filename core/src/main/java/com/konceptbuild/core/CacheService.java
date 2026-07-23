@@ -6,6 +6,8 @@ import com.konceptbuild.core.dto.WorkerDto;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public interface CacheService {
@@ -13,7 +15,11 @@ public interface CacheService {
 
     List<WorkerDto> getAllWorkers();
 
+    Optional<WorkerDto> getWorker(UUID id);
+
     List<ClientDto> getAllClients();
 
     List<WorkDto> getAllWorks();
+
+    Optional<WorkDto> getWork(UUID id);
 }

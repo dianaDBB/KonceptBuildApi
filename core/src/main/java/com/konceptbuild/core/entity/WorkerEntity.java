@@ -1,5 +1,6 @@
 package com.konceptbuild.core.entity;
 
+import com.konceptbuild.core.dto.WorkerDto;
 import com.konceptbuild.core.enums.Status;
 import com.konceptbuild.core.enums.WorkerContractType;
 import com.konceptbuild.core.request.WorkerRequest;
@@ -83,6 +84,27 @@ public class WorkerEntity {
 
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
+
+    public WorkerEntity(WorkerDto dto) {
+        this.id = dto.getId();
+        this.name = dto.getName();
+        this.nif = dto.getNif();
+        this.status = dto.getStatus();
+        this.phoneCountryCode = dto.getPhoneCountryCode();
+        this.phone = dto.getPhone();
+        this.email = dto.getEmail();
+        this.function = dto.getFunction();
+        this.defaultHours = dto.getDefaultHours();
+        this.workerContractType = dto.getWorkerContractType();
+        this.hourRate = dto.getHourRate();
+        this.monthlySalary = dto.getMonthlySalary();
+        this.tsu = dto.getTsu();
+        this.mealAllowance = dto.getMealAllowance();
+        this.accidentInsurance = dto.getAccidentInsurance();
+        this.startDate = dto.getStartDate();
+        this.endDate = dto.getEndDate();
+        this.hourCost = dto.getHourCost();
+    }
 
     public WorkerEntity(WorkerRequest request) {
         this.id = request.id();
