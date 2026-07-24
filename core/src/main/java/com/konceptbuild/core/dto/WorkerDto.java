@@ -59,4 +59,13 @@ public class WorkerDto {
         this.startDate = entity.getStartDate();
         this.endDate = entity.getEndDate();
     }
+
+    public boolean isActiveDuringPeriod(LocalDate startDate, LocalDate endDate, LocalDate periodStart,
+                                        LocalDate periodEnd) {
+        if (startDate == null) {
+            return false;
+        }
+
+        return !startDate.isAfter(periodEnd) && (endDate == null || !endDate.isBefore(periodStart));
+    }
 }

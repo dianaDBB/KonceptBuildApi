@@ -69,7 +69,7 @@ public class WorkServiceImpl implements WorkService {
     }
 
     private boolean isWithinRange(LocalDate value, LocalDate min, LocalDate max) {
-        return (min == null || (value != null && !value.isBefore(min))) && (max == null || (value != null && !value.isAfter(max)));
+        return value == null || (min == null || !value.isBefore(min)) && (max == null || !value.isAfter(max));
     }
 
     private Comparator<WorkDto> comparatorFor(WorkSortField field, SortDirection sortDirection) {

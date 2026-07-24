@@ -25,7 +25,7 @@ public class TimesheetServiceImpl implements TimesheetService {
     @Transactional(readOnly = true)
     public MonthlyTimesheetDto getMonthlyTimesheet(Integer year, Integer month) {
 
-        List<WorkerDto> workers = cacheService.getAllWorkers();
+        List<WorkerDto> workers = cacheService.getAllActiveWorkers(year, month);
         List<TimesheetEntity> timesheets = timesheetRepository.findByYearAndMonth(year, month);
 
         Map<UUID, TimesheetEntity> timesheetByWorker = new LinkedHashMap<>();
@@ -60,7 +60,8 @@ public class TimesheetServiceImpl implements TimesheetService {
                 workerDto.setTotalHours(totalHours);
 
                 switch (workerDto.getWorker().getWorkerContractType()) {
-                    case WorkerContractType.INTERNAL -> workerDto.setTotalCost(workerDto.getWorker().getMonthlySalary());
+                    case WorkerContractType.INTERNAL ->
+                            workerDto.setTotalCost(workerDto.getWorker().getMonthlySalary());
                     case WorkerContractType.CONTRACTOR -> workerDto.setTotalCost(totalHours * workerDto.getHourCost());
                 }
             }

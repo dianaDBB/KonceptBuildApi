@@ -15,6 +15,8 @@ public interface CacheService {
 
     List<WorkerDto> getAllWorkers();
 
+    List<WorkerDto> getAllActiveWorkers(Integer year, Integer month);
+
     Optional<WorkerDto> getWorker(UUID id);
 
     List<ClientDto> getAllClients();
