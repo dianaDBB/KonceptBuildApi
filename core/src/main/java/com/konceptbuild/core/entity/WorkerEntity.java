@@ -117,13 +117,23 @@ public class WorkerEntity {
         this.function = request.function();
         this.defaultHours = request.defaultHours();
         this.workerContractType = request.workerContractType();
-        this.hourRate = request.hourRate();
         this.monthlySalary = request.monthlySalary();
         this.tsu = request.tsu();
         this.mealAllowance = request.mealAllowance();
         this.accidentInsurance = request.accidentInsurance();
         this.startDate = request.startDate();
         this.endDate = request.endDate();
+
+        this.hourRate = switch (request.workerContractType()) {
+            case CONTRACTOR -> {
+                yield request.hourRate();
+            }
+
+            case INTERNAL -> {
+                var monthlyCost = (request.monthlySalary() * 14 / 12);
+                yield monthlyCost / 21 / request.defaultHours();
+            }
+        };
 
         this.hourCost = switch (request.workerContractType()) {
             case CONTRACTOR -> {
@@ -132,10 +142,10 @@ public class WorkerEntity {
 
             case INTERNAL -> {
                 var tsu = (request.monthlySalary() * (request.tsu() / 100)) * 14 / 12;
-                var mealAllowance = (request.mealAllowance() * 22) * 11 / 12;
+                var mealAllowance = (request.mealAllowance() * 21) * 11 / 12;
                 var accidentInsurance = request.accidentInsurance();
                 var monthlyCost = (request.monthlySalary() * 14 / 12) + tsu + mealAllowance + accidentInsurance;
-                yield monthlyCost / 22 / request.defaultHours();
+                yield monthlyCost / 21 / request.defaultHours();
             }
         };
     }
