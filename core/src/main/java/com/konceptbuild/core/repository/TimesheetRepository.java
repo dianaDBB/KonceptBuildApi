@@ -13,5 +13,7 @@ public interface TimesheetRepository extends JpaRepository<TimesheetEntity, UUID
             Integer year,
             Integer month);
 
+    List<TimesheetEntity> findByYear(Integer year);
+
     List<TimesheetEntity> findByYearAndMonth(Integer year, Integer month);
 }
