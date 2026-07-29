@@ -44,9 +44,8 @@ public class TimesheetServiceImpl implements TimesheetService {
             WorkerTimesheetDto workerDto = WorkerTimesheetDto
                     .builder()
                     .worker(worker)
-                    .hourCost(worker.getHourRate())
+                    .expectedHours(0.0)
                     .totalHours(0.0)
-                    .totalCost(0.0)
                     .worksTimesheet(new ArrayList<>())
                     .build();
 
@@ -54,14 +53,11 @@ public class TimesheetServiceImpl implements TimesheetService {
                 workerDto.setTimesheetId(timesheet.getId());
                 workerDto.setWorksTimesheet(buildLines(timesheet));
 
+                workerDto.setExpectedHours(timesheet.getExpectedHours());
                 workerDto.setTotalHours(timesheet.getTotalHours());
                 workerDto.setTotalExtraHours(timesheet.getTotalExtraHours());
                 workerDto.setTotalPaidAbsenceHours(timesheet.getTotalPaidAbsenceHours());
                 workerDto.setTotalUnpaidAbsenceHours(timesheet.getTotalUnpaidAbsenceHours());
-
-                workerDto.setTotalCost(timesheet.getTotalCost());
-                workerDto.setTotalCostExtraHours(timesheet.getTotalCostExtraHours());
-                workerDto.setTotalCostUnpaidAbsenceHours(timesheet.getTotalCostUnpaidAbsenceHours());
             }
             workerDtoList.add(workerDto);
         }
@@ -140,6 +136,7 @@ public class TimesheetServiceImpl implements TimesheetService {
             }
 
             validateInternalWorkerHours(timesheet, worker);
+            updateExpectedHours(timesheet, worker);
             updateTotals(timesheet, worker);
             timesheetRepository.save(timesheet);
         }
@@ -183,6 +180,29 @@ public class TimesheetServiceImpl implements TimesheetService {
                         " least %.1f.", worker.getName(), hours, day, worker.getDefaultHours()));
             }
         }
+    }
+
+    private void updateExpectedHours(TimesheetEntity timesheet, WorkerDto worker) {
+        LocalDate firstDay = LocalDate.of(timesheet.getYear(), timesheet.getMonth(), 1);
+        LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
+
+        int workingDays = 0;
+
+        for (LocalDate day = firstDay; !day.isAfter(lastDay); day = day.plusDays(1)) {
+            switch (day.getDayOfWeek()) {
+                case SATURDAY, SUNDAY -> {
+                    continue;
+                }
+            }
+
+            if (holidayService.isHoliday(day)) {
+                continue;
+            }
+
+            workingDays++;
+        }
+
+        timesheet.setExpectedHours(worker.getDefaultHours() * workingDays);
     }
 
     private void updateTotals(TimesheetEntity timesheet, WorkerDto worker) {
@@ -230,25 +250,9 @@ public class TimesheetServiceImpl implements TimesheetService {
             totalExtraHours += Math.max(0.0, workedHours - worker.getDefaultHours());
         }
 
-        double hourlyRate = worker.getHourRate();
-
-        double totalCostExtraHours = totalExtraHours * hourlyRate;
-        double totalCostUnpaidAbsenceHours = totalUnpaidAbsenceHours * hourlyRate;
-
-        double totalCost = switch (worker.getWorkerContractType()) {
-            case INTERNAL -> worker.getMonthlySalary() + totalCostExtraHours - totalCostUnpaidAbsenceHours;
-
-            case CONTRACTOR -> (totalNormalHours * hourlyRate) + totalCostExtraHours;
-        };
-
         timesheet.setTotalHours(totalNormalHours + totalExtraHours + totalPaidAbsenceHours + totalUnpaidAbsenceHours);
-
         timesheet.setTotalExtraHours(totalExtraHours);
         timesheet.setTotalPaidAbsenceHours(totalPaidAbsenceHours);
         timesheet.setTotalUnpaidAbsenceHours(totalUnpaidAbsenceHours);
-
-        timesheet.setTotalCost(totalCost);
-        timesheet.setTotalCostExtraHours(totalCostExtraHours);
-        timesheet.setTotalCostUnpaidAbsenceHours(totalCostUnpaidAbsenceHours);
     }
 }

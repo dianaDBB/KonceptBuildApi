@@ -37,6 +37,18 @@ public class WageEntity {
     @JoinColumn(name = "timesheet_id", nullable = false, foreignKey = @ForeignKey(name = "fk_timesheet"))
     private TimesheetEntity timesheet;
 
+    @Column(name = "expected_wage", precision = 10, scale = 2)
+    private Double expectedWage;
+
+    @Column(name = "expected_extra_hours", precision = 10, scale = 2)
+    private Double expectedExtraHours;
+
+    @Column(name = "expected_deductions", precision = 10, scale = 2)
+    private Double expectedDeductions;
+
+    @Column(name = "expected_internal_cost", precision = 10, scale = 2)
+    private Double expectedInternalCost;
+
     @Column(name = "paid_value", precision = 10, scale = 2)
     private Double paidValue;
 

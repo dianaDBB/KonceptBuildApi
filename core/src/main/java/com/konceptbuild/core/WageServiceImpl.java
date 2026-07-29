@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 @Service
 public class WageServiceImpl implements WageService {
@@ -32,23 +33,16 @@ public class WageServiceImpl implements WageService {
     @Autowired
     private TimesheetRepository timesheetRepository;
 
+    @Autowired
+    private HolidayService holidayService;
+
     @Override
     public List<WageDto> search(WageFilter filter) {
         Comparator<WageDto> comparator = comparatorFor(filter.sortBy(), filter.sortDirection());
 
-        return cacheServiceImpl.getAllWages().stream()
-                .filter(wage -> isWithinRange(wage.getYear(), filter.yearMin(), filter.yearMax()))
-                .filter(wage -> isWithinRange(wage.getMonth(), filter.monthMin(), filter.monthMax()))
-                .filter(wage -> matchesString(wage.getWorkerDto().getCode(), filter.workerCode()))
-                .filter(wage -> matchesString(wage.getWorkerDto().getName(), filter.workerName()))
-                .filter(wage -> isWithinRange(wage.getWorkerTimesheetDto().getTotalCost(), filter.expectedPayMin(),
-                        filter.expectedPayMax()))
-                .filter(wage -> isWithinRange(wage.getPaidValue(), filter.paidValueMin(), filter.paidValueMax()))
-                .filter(wage -> isWithinRange(wage.getPaidDate(), filter.paidDateMin(), filter.paidDateMax()))
-                .filter(wage -> filter.paymentMethod() == null || filter.paymentMethod() == wage.getPaymentMethod())
-                .filter(wage -> matchesString(wage.getNotes(), filter.notes()))
-                .sorted(comparator)
-                .toList();
+        return cacheServiceImpl.getAllWages().stream().filter(wage -> isWithinRange(wage.getYear(), filter.yearMin(),
+                filter.yearMax())).filter(wage -> isWithinRange(wage.getMonth(), filter.monthMin(),
+                filter.monthMax())).filter(wage -> matchesString(wage.getWorkerDto().getCode(), filter.workerCode())).filter(wage -> matchesString(wage.getWorkerDto().getName(), filter.workerName())).filter(wage -> isWithinRange(wage.getExpectedWage(), filter.expectedWageMin(), filter.expectedWageMax())).filter(wage -> isWithinRange(wage.getExpectedExtraHours(), filter.expectedExtraHoursMin(), filter.expectedExtraHoursMax())).filter(wage -> isWithinRange(wage.getExpectedDeductions(), filter.expectedDeductionsMin(), filter.expectedDeductionsMax())).filter(wage -> isWithinRange(wage.getExpectedInternalCost(), filter.expectedInternalCostMin(), filter.expectedInternalCostMax())).filter(wage -> isWithinRange(wage.getPaidValue(), filter.paidValueMin(), filter.paidValueMax())).filter(wage -> isWithinRange(wage.getPaidDate(), filter.paidDateMin(), filter.paidDateMax())).filter(wage -> filter.paymentMethod() == null || filter.paymentMethod() == wage.getPaymentMethod()).filter(wage -> matchesString(wage.getNotes(), filter.notes())).sorted(comparator).toList();
     }
 
     private boolean matchesString(String value, String query) {
@@ -68,25 +62,18 @@ public class WageServiceImpl implements WageService {
     }
 
     private Comparator<WageDto> comparatorFor(WageSortField field, SortDirection sortDirection) {
-        Comparator<String> stringComparator =
-                sortDirection == SortDirection.DESC
-                        ? Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER.reversed())
-                        : Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER);
+        Comparator<String> stringComparator = sortDirection == SortDirection.DESC ?
+                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER.reversed()) :
+                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER);
 
-        Comparator<Integer> intComparator =
-                sortDirection == SortDirection.DESC
-                        ? Comparator.nullsLast(Comparator.reverseOrder())
-                        : Comparator.nullsLast(Comparator.naturalOrder());
+        Comparator<Integer> intComparator = sortDirection == SortDirection.DESC ?
+                Comparator.nullsLast(Comparator.reverseOrder()) : Comparator.nullsLast(Comparator.naturalOrder());
 
-        Comparator<Double> doubleComparator =
-                sortDirection == SortDirection.DESC
-                        ? Comparator.nullsLast(Comparator.reverseOrder())
-                        : Comparator.nullsLast(Comparator.naturalOrder());
+        Comparator<Double> doubleComparator = sortDirection == SortDirection.DESC ?
+                Comparator.nullsLast(Comparator.reverseOrder()) : Comparator.nullsLast(Comparator.naturalOrder());
 
-        Comparator<LocalDate> dateComparator =
-                sortDirection == SortDirection.DESC
-                        ? Comparator.nullsLast(Comparator.reverseOrder())
-                        : Comparator.nullsLast(Comparator.naturalOrder());
+        Comparator<LocalDate> dateComparator = sortDirection == SortDirection.DESC ?
+                Comparator.nullsLast(Comparator.reverseOrder()) : Comparator.nullsLast(Comparator.naturalOrder());
 
         return switch (field) {
             case CODE -> Comparator.comparing(WageDto::getCode, stringComparator);
@@ -94,15 +81,15 @@ public class WageServiceImpl implements WageService {
             case MONTH -> Comparator.comparing(WageDto::getMonth, intComparator);
             case WORKER_CODE -> Comparator.comparing(wage -> wage.getWorkerDto().getCode(), stringComparator);
             case WORKER_NAME -> Comparator.comparing(wage -> wage.getWorkerDto().getName(), stringComparator);
-            case EXPECTED_PAY ->
-                    Comparator.comparing(wage -> wage.getWorkerTimesheetDto().getTotalCost(), doubleComparator);
+            case EXPECTED_WAGE -> Comparator.comparing(WageDto::getExpectedWage, doubleComparator);
+            case EXPECTED_EXTRA_HOURS -> Comparator.comparing(WageDto::getExpectedExtraHours, doubleComparator);
+            case EXPECTED_DEDUCTIONS -> Comparator.comparing(WageDto::getExpectedDeductions, doubleComparator);
+            case EXPECTED_INTERNAL_COST -> Comparator.comparing(WageDto::getExpectedInternalCost, doubleComparator);
             case PAID_VALUE -> Comparator.comparing(WageDto::getPaidValue, doubleComparator);
             case PAID_DATE -> Comparator.comparing(WageDto::getPaidDate, dateComparator);
-            case PAYMENT_METHOD -> Comparator.comparing(
-                    WageDto::getPaymentMethod,
-                    sortDirection == SortDirection.DESC
-                            ? Comparator.nullsLast(Comparator.reverseOrder())
-                            : Comparator.nullsLast(Comparator.naturalOrder()));
+            case PAYMENT_METHOD -> Comparator.comparing(WageDto::getPaymentMethod, sortDirection == SortDirection.DESC ?
+                    Comparator.nullsLast(Comparator.reverseOrder()) :
+                    Comparator.nullsLast(Comparator.naturalOrder()));
             case NOTES -> Comparator.comparing(WageDto::getNotes, stringComparator);
         };
     }
@@ -113,18 +100,14 @@ public class WageServiceImpl implements WageService {
                 request.workerId()).orElse(new WageEntity());
 
         WorkerDto workerDto =
-                cacheServiceImpl.getWorker(request.workerId()).orElseThrow(() -> new EntityNotFoundException("Worker " +
-                        "not found - " + request.workerId()));
+                cacheServiceImpl.getWorker(request.workerId()).orElseThrow(() -> new EntityNotFoundException("Worker "
+                        + "not found - " + request.workerId()));
 
         TimesheetEntity timesheetEntity =
                 timesheetRepository.findById(request.timesheetId()).orElseThrow(() -> new EntityNotFoundException(
                         "Timesheet not found - " + request.workerId()));
 
-        String code = "%d-%02d-%s".formatted(
-                request.year(),
-                request.month(),
-                workerDto.getCode()
-        );
+        String code = "%d-%02d-%s".formatted(request.year(), request.month(), workerDto.getCode());
 
         currentEntity.setCode(code);
         currentEntity.setYear(request.year());
@@ -132,14 +115,67 @@ public class WageServiceImpl implements WageService {
         currentEntity.setWorker(new WorkerEntity(workerDto));
         currentEntity.setTimesheet(timesheetEntity);
 
+
+        double hourlyRate = workerDto.getHourRate();
+        double expectedExtraHoursCost = timesheetEntity.getTotalExtraHours() * hourlyRate;
+        double expectedDeductionsCost = timesheetEntity.getTotalUnpaidAbsenceHours() * hourlyRate;
+
+        double expectedWage = switch (workerDto.getWorkerContractType()) {
+            case INTERNAL -> workerDto.getMonthlySalary()
+                    + expectedExtraHoursCost
+                    - expectedDeductionsCost
+                    + Objects.requireNonNullElse(workerDto.getMealAllowance(), 0.0) * getWorkingDays(timesheetEntity);
+
+            case CONTRACTOR ->
+                    ((timesheetEntity.getTotalHours() - timesheetEntity.getTotalExtraHours()) * hourlyRate) + expectedExtraHoursCost;
+        };
+
+        currentEntity.setExpectedWage(expectedWage);
+        currentEntity.setExpectedExtraHours(expectedExtraHoursCost);
+        currentEntity.setExpectedDeductions(-expectedDeductionsCost);
+
+        double expectedInternalCost = switch (workerDto.getWorkerContractType()) {
+            case INTERNAL -> expectedWage
+                    + workerDto.getAccidentInsurance()
+                    + ((workerDto.getMonthlySalary() + expectedExtraHoursCost - expectedDeductionsCost) * workerDto.getTsu() / 100);
+
+            case CONTRACTOR -> expectedWage;
+        };
+
+        currentEntity.setExpectedInternalCost(expectedInternalCost);
+
         wageRepository.save(currentEntity);
         cacheServiceImpl.refreshCache();
     }
 
+    private int getWorkingDays(TimesheetEntity timesheet) {
+        LocalDate firstDay = LocalDate.of(timesheet.getYear(), timesheet.getMonth(), 1);
+        LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
+
+        int workingDays = 0;
+
+        for (LocalDate day = firstDay; !day.isAfter(lastDay); day = day.plusDays(1)) {
+            switch (day.getDayOfWeek()) {
+                case SATURDAY, SUNDAY -> {
+                    continue;
+                }
+            }
+
+            if (holidayService.isHoliday(day)) {
+                continue;
+            }
+
+            workingDays++;
+        }
+
+        return workingDays;
+    }
+
     @Override
     public void update(UpdateWageRequest request) {
-        WageEntity currentEntity = wageRepository.findById(request.id())
-                .orElseThrow(() -> new EntityNotFoundException("Wage not found - " + request.id()));
+        WageEntity currentEntity =
+                wageRepository.findById(request.id()).orElseThrow(() -> new EntityNotFoundException("Wage not found -" +
+                        " " + request.id()));
 
         currentEntity.setPaidValue(request.paidValue());
         currentEntity.setPaidDate(request.paidDate());

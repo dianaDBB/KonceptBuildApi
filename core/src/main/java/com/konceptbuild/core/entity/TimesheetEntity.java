@@ -28,6 +28,9 @@ public class TimesheetEntity {
     @Column(name = "month", nullable = false)
     private int month;
 
+    @Column(name = "expected_hours")
+    private Double expectedHours;
+
     @Column(name = "total_hours")
     private Double totalHours;
 
@@ -39,15 +42,6 @@ public class TimesheetEntity {
 
     @Column(name = "total_unpaid_absence_hours")
     private Double totalUnpaidAbsenceHours;
-
-    @Column(name = "total_cost")
-    private Double totalCost;
-
-    @Column(name = "total_cost_extra_hours")
-    private Double totalCostExtraHours;
-
-    @Column(name = "total_cost_unpaid_absence_hours")
-    private Double totalCostUnpaidAbsenceHours;
 
     @OneToMany(
             mappedBy = "timesheet",

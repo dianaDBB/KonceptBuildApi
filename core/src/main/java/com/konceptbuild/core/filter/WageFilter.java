@@ -11,6 +11,14 @@ public record WageFilter(
         Integer monthMin,
         String workerCode,
         String workerName,
+        Double expectedWageMin,
+        Double expectedWageMax,
+        Double expectedExtraHoursMin,
+        Double expectedExtraHoursMax,
+        Double expectedDeductionsMin,
+        Double expectedDeductionsMax,
+        Double expectedInternalCostMin,
+        Double expectedInternalCostMax,
         Double expectedPayMin,
         Double expectedPayMax,
         Double paidValueMin,
@@ -27,6 +35,10 @@ public record WageFilter(
         sortBy = sortBy == null ? WageSortField.CODE : sortBy;
         sortDirection = sortDirection == null ? SortDirection.DESC : sortDirection;
 
+        validateRange("expectedWage", expectedWageMin, expectedWageMax);
+        validateRange("expectedExtraHours", expectedExtraHoursMin, expectedExtraHoursMax);
+        validateRange("expectedDeductions", expectedDeductionsMin, expectedDeductionsMax);
+        validateRange("expectedInternalCost", expectedInternalCostMin, expectedInternalCostMax);
         validateRange("expectedPay", expectedPayMin, expectedPayMax);
         validateRange("paidValue", paidValueMin, paidValueMax);
         validateRange("paidDate", paidDateMin, paidDateMax);

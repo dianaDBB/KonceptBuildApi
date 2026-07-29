@@ -17,27 +17,22 @@ public class WorkerTimesheetDto {
     private UUID timesheetId;
     private WorkerDto worker;
 
-    private Double hourCost;
+    private Double expectedHours;
     private Double totalHours;
     private Double totalExtraHours;
     private Double totalPaidAbsenceHours;
     private Double totalUnpaidAbsenceHours;
-    private Double totalCost;
-    private Double totalCostExtraHours;
-    private Double totalCostUnpaidAbsenceHours;
 
     private List<WorkTimesheetDto> worksTimesheet;
 
     public WorkerTimesheetDto(TimesheetEntity entity) {
         this.timesheetId = entity.getId();
         this.worker = new WorkerDto(entity.getWorker());
-        this.hourCost = entity.getTotalHours();
+        this.expectedHours = entity.getExpectedHours();
+        this.totalHours = entity.getTotalHours();
         this.totalExtraHours = entity.getTotalExtraHours();
         this.totalPaidAbsenceHours = entity.getTotalPaidAbsenceHours();
         this.totalUnpaidAbsenceHours = entity.getTotalUnpaidAbsenceHours();
-        this.totalCost = entity.getTotalCost();
-        this.totalCostExtraHours = entity.getTotalCostExtraHours();
-        this.totalCostUnpaidAbsenceHours = entity.getTotalCostUnpaidAbsenceHours();
         this.worksTimesheet = entity.getTimesheetLineEntities().stream().map(WorkTimesheetDto::new).toList();
     }
 }

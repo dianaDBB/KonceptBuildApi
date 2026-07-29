@@ -21,6 +21,10 @@ public class WageDto {
     private Integer month;
     private WorkerDto workerDto;
     private WorkerTimesheetDto workerTimesheetDto;
+    private Double expectedWage;
+    private Double expectedExtraHours;
+    private Double expectedDeductions;
+    private Double expectedInternalCost;
     private Double paidValue;
     private LocalDate paidDate;
     private PaymentMethod paymentMethod;
@@ -33,6 +37,10 @@ public class WageDto {
         this.month = entity.getMonth();
         this.workerDto = new WorkerDto(entity.getWorker());
         this.workerTimesheetDto = new WorkerTimesheetDto(entity.getTimesheet());
+        this.expectedWage = entity.getExpectedWage();
+        this.expectedExtraHours = entity.getExpectedExtraHours();
+        this.expectedDeductions = entity.getExpectedDeductions();
+        this.expectedInternalCost = entity.getExpectedInternalCost();
         this.paidValue = entity.getPaidValue();
         this.paidDate = entity.getPaidDate();
         this.paymentMethod = entity.getPaymentMethod();
