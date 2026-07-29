@@ -54,5 +54,5 @@ public class TimesheetEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<TimesheetLineEntity> lines;
+    private List<TimesheetLineEntity> timesheetLineEntities;
 }

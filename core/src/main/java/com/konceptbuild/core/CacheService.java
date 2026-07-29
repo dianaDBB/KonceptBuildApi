@@ -1,6 +1,7 @@
 package com.konceptbuild.core;
 
 import com.konceptbuild.core.dto.ClientDto;
+import com.konceptbuild.core.dto.WageDto;
 import com.konceptbuild.core.dto.WorkDto;
 import com.konceptbuild.core.dto.WorkerDto;
 import org.springframework.stereotype.Component;
@@ -24,4 +25,6 @@ public interface CacheService {
     List<WorkDto> getAllWorks();
 
     Optional<WorkDto> getWork(UUID id);
+
+    List<WageDto> getAllWages();
 }

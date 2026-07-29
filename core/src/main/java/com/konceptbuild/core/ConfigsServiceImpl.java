@@ -1,13 +1,7 @@
 package com.konceptbuild.core;
 
-import com.konceptbuild.core.dto.AttendanceCodeDto;
-import com.konceptbuild.core.dto.StatusDto;
-import com.konceptbuild.core.dto.WorkStatusDto;
-import com.konceptbuild.core.dto.WorkerContractTypeDto;
-import com.konceptbuild.core.enums.AttendanceCode;
-import com.konceptbuild.core.enums.Status;
-import com.konceptbuild.core.enums.WorkStatus;
-import com.konceptbuild.core.enums.WorkerContractType;
+import com.konceptbuild.core.dto.*;
+import com.konceptbuild.core.enums.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -52,6 +46,16 @@ public class ConfigsServiceImpl implements ConfigsService {
                         .code(code.getCode())
                         .label(code.getLabel())
                         .paid(code.isPaid())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    public List<PaymentMethodDto> getPaymentMethod() {
+        return Arrays.stream(PaymentMethod.values())
+                .map(code -> PaymentMethodDto.builder()
+                        .code(code.getCode())
+                        .label(code.getLabel())
                         .build())
                 .toList();
     }

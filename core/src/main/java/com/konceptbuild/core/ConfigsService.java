@@ -1,9 +1,6 @@
 package com.konceptbuild.core;
 
-import com.konceptbuild.core.dto.AttendanceCodeDto;
-import com.konceptbuild.core.dto.StatusDto;
-import com.konceptbuild.core.dto.WorkStatusDto;
-import com.konceptbuild.core.dto.WorkerContractTypeDto;
+import com.konceptbuild.core.dto.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,4 +14,6 @@ public interface ConfigsService {
     List<WorkStatusDto> getWorkStatus();
 
     List<AttendanceCodeDto> getAttendanceCodes();
+
+    List<PaymentMethodDto> getPaymentMethod();
 }

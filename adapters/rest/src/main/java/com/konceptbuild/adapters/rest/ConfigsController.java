@@ -1,10 +1,7 @@
 package com.konceptbuild.adapters.rest;
 
 import com.konceptbuild.core.ConfigsService;
-import com.konceptbuild.core.dto.AttendanceCodeDto;
-import com.konceptbuild.core.dto.StatusDto;
-import com.konceptbuild.core.dto.WorkStatusDto;
-import com.konceptbuild.core.dto.WorkerContractTypeDto;
+import com.konceptbuild.core.dto.*;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -51,5 +48,12 @@ public class ConfigsController {
     @ApiResponse(responseCode = "200", description = "Attendance codes retrieved successfully")
     public List<AttendanceCodeDto> getAttendanceCodes() {
         return configsService.getAttendanceCodes();
+    }
+
+    @GetMapping("/payment-method")
+    @Operation(description = "Returns all possible payment methods")
+    @ApiResponse(responseCode = "200", description = "Payment methods retrieved successfully")
+    public List<PaymentMethodDto> getPaymentMethods() {
+        return configsService.getPaymentMethod();
     }
 }

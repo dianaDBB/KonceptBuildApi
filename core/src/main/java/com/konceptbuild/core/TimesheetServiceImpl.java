@@ -51,6 +51,7 @@ public class TimesheetServiceImpl implements TimesheetService {
                     .build();
 
             if (timesheet != null) {
+                workerDto.setTimesheetId(timesheet.getId());
                 workerDto.setWorksTimesheet(buildLines(timesheet));
 
                 workerDto.setTotalHours(timesheet.getTotalHours());
@@ -73,7 +74,7 @@ public class TimesheetServiceImpl implements TimesheetService {
     private List<WorkTimesheetDto> buildLines(TimesheetEntity timesheet) {
         List<WorkTimesheetDto> works = new ArrayList<>();
 
-        for (TimesheetLineEntity line : timesheet.getLines()) {
+        for (TimesheetLineEntity line : timesheet.getTimesheetLineEntities()) {
             List<DayEntryDto> days = line.getEntries()
                     .stream()
                     .sorted(Comparator.comparing(TimesheetEntryEntity::getDate))
@@ -98,11 +99,11 @@ public class TimesheetServiceImpl implements TimesheetService {
                 entity.setWorker(new WorkerEntity(worker));
                 entity.setYear(dto.getYear());
                 entity.setMonth(dto.getMonth());
-                entity.setLines(new ArrayList<>());
+                entity.setTimesheetLineEntities(new ArrayList<>());
                 return entity;
             });
 
-            timesheet.getLines().clear();
+            timesheet.getTimesheetLineEntities().clear();
 
             for (WorkTimesheetDto workDto : workerDto.getWorksTimesheet()) {
                 TimesheetLineEntity line = new TimesheetLineEntity();
@@ -135,7 +136,7 @@ public class TimesheetServiceImpl implements TimesheetService {
 
                     line.getEntries().add(entry);
                 }
-                timesheet.getLines().add(line);
+                timesheet.getTimesheetLineEntities().add(line);
             }
 
             validateInternalWorkerHours(timesheet, worker);
@@ -154,7 +155,7 @@ public class TimesheetServiceImpl implements TimesheetService {
 
         Map<LocalDate, Double> hoursPerDay = new HashMap<>();
 
-        for (TimesheetLineEntity line : timesheet.getLines()) {
+        for (TimesheetLineEntity line : timesheet.getTimesheetLineEntities()) {
             for (TimesheetEntryEntity entry : line.getEntries()) {
                 if (entry.getHours() == null) {
                     continue;
@@ -193,7 +194,7 @@ public class TimesheetServiceImpl implements TimesheetService {
         // Worked hours per day (to check extra hours based on day)
         Map<LocalDate, Double> workHoursPerDay = new HashMap<>();
 
-        for (TimesheetLineEntity line : timesheet.getLines()) {
+        for (TimesheetLineEntity line : timesheet.getTimesheetLineEntities()) {
 
             // ABSENCE
             if (line.getAttendanceCode() != null) {
