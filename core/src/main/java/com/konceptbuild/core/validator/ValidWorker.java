@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = {WorkerValidator.class})
+@Constraint(validatedBy = {AddWorkerValidator.class, UpdateWorkerValidator.class, UpdateWorkerCompensationValidator.class})
 public @interface ValidWorker {
     String message() default "Invalid worker";
 

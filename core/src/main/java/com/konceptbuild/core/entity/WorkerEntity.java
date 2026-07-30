@@ -3,7 +3,8 @@ package com.konceptbuild.core.entity;
 import com.konceptbuild.core.dto.WorkerDto;
 import com.konceptbuild.core.enums.Status;
 import com.konceptbuild.core.enums.WorkerContractType;
-import com.konceptbuild.core.request.WorkerRequest;
+import com.konceptbuild.core.request.AddWorkerRequest;
+import com.konceptbuild.core.request.UpdateWorkerRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Generated;
@@ -54,30 +55,9 @@ public class WorkerEntity {
     @Column(name = "function", nullable = false)
     private String function;
 
-    @Column(name = "hour_cost", precision = 10, scale = 1)
-    private Double hourCost;
-
-    @Column(name = "default_hours", precision = 10, scale = 1)
-    private Double defaultHours;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "contract_type", nullable = false)
     private WorkerContractType workerContractType;
-
-    @Column(name = "hour_rate", precision = 3, scale = 1)
-    private Double hourRate;
-
-    @Column(name = "monthly_salary", precision = 10, scale = 2)
-    private Double monthlySalary;
-
-    @Column(name = "tsu", precision = 10, scale = 2)
-    private Double tsu;
-
-    @Column(name = "meal_allowance", precision = 10, scale = 2)
-    private Double mealAllowance;
-
-    @Column(name = "accident_insurance", precision = 10, scale = 2)
-    private Double accidentInsurance;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
@@ -94,19 +74,25 @@ public class WorkerEntity {
         this.phone = dto.getPhone();
         this.email = dto.getEmail();
         this.function = dto.getFunction();
-        this.defaultHours = dto.getDefaultHours();
         this.workerContractType = dto.getWorkerContractType();
-        this.hourRate = dto.getHourRate();
-        this.monthlySalary = dto.getMonthlySalary();
-        this.tsu = dto.getTsu();
-        this.mealAllowance = dto.getMealAllowance();
-        this.accidentInsurance = dto.getAccidentInsurance();
         this.startDate = dto.getStartDate();
         this.endDate = dto.getEndDate();
-        this.hourCost = dto.getHourCost();
     }
 
-    public WorkerEntity(WorkerRequest request) {
+    public WorkerEntity(AddWorkerRequest request) {
+        this.name = request.name();
+        this.nif = request.nif();
+        this.status = request.status();
+        this.phoneCountryCode = request.phoneCountryCode();
+        this.phone = request.phone();
+        this.email = request.email();
+        this.function = request.function();
+        this.workerContractType = request.workerContractType();
+        this.startDate = request.startDate();
+        this.endDate = request.endDate();
+    }
+
+    public WorkerEntity(UpdateWorkerRequest request) {
         this.id = request.id();
         this.name = request.name();
         this.nif = request.nif();
@@ -115,38 +101,8 @@ public class WorkerEntity {
         this.phone = request.phone();
         this.email = request.email();
         this.function = request.function();
-        this.defaultHours = request.defaultHours();
         this.workerContractType = request.workerContractType();
-        this.monthlySalary = request.monthlySalary();
-        this.tsu = request.tsu();
-        this.mealAllowance = request.mealAllowance();
-        this.accidentInsurance = request.accidentInsurance();
         this.startDate = request.startDate();
         this.endDate = request.endDate();
-
-        this.hourRate = switch (request.workerContractType()) {
-            case CONTRACTOR -> {
-                yield request.hourRate();
-            }
-
-            case INTERNAL -> {
-                var monthlyCost = (request.monthlySalary() * 14 / 12);
-                yield monthlyCost / 21 / request.defaultHours();
-            }
-        };
-
-        this.hourCost = switch (request.workerContractType()) {
-            case CONTRACTOR -> {
-                yield request.hourRate();
-            }
-
-            case INTERNAL -> {
-                var tsu = (request.monthlySalary() * (request.tsu() / 100)) * 14 / 12;
-                var mealAllowance = (request.mealAllowance() * 21) * 11 / 12;
-                var accidentInsurance = request.accidentInsurance();
-                var monthlyCost = (request.monthlySalary() * 14 / 12) + tsu + mealAllowance + accidentInsurance;
-                yield monthlyCost / 21 / request.defaultHours();
-            }
-        };
     }
 }

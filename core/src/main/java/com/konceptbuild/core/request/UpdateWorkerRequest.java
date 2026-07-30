@@ -1,7 +1,7 @@
 package com.konceptbuild.core.request;
 
-import com.konceptbuild.core.enums.WorkerContractType;
 import com.konceptbuild.core.enums.Status;
+import com.konceptbuild.core.enums.WorkerContractType;
 import com.konceptbuild.core.validator.ValidWorker;
 import jakarta.validation.constraints.*;
 
@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @ValidWorker
-public record WorkerRequest(
+public record UpdateWorkerRequest(
         UUID id,
 
         @NotBlank(message = "Name is required")
@@ -46,19 +46,8 @@ public record WorkerRequest(
         @NotBlank(message = "Function is required")
         String function,
 
-        @NotNull(message = "Contact is required")
-        @DecimalMin("0.0")
-        @DecimalMax("12.0")
-        Double defaultHours,
-
         @NotNull(message = "ContactType is required")
         WorkerContractType workerContractType,
-
-        Double hourRate,
-        Double monthlySalary,
-        Double tsu,
-        Double mealAllowance,
-        Double accidentInsurance,
 
         @NotNull(message = "StartDate is required")
         LocalDate startDate,

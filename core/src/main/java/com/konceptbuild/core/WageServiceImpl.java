@@ -116,15 +116,15 @@ public class WageServiceImpl implements WageService {
         currentEntity.setTimesheet(timesheetEntity);
 
 
-        double hourlyRate = workerDto.getHourRate();
+        double hourlyRate = timesheetEntity.getWorkerHistory().getHourRate();
         double expectedExtraHoursCost = timesheetEntity.getTotalExtraHours() * hourlyRate;
         double expectedDeductionsCost = timesheetEntity.getTotalUnpaidAbsenceHours() * hourlyRate;
 
         double expectedWage = switch (workerDto.getWorkerContractType()) {
-            case INTERNAL -> workerDto.getMonthlySalary()
+            case INTERNAL -> timesheetEntity.getWorkerHistory().getMonthlySalary()
                     + expectedExtraHoursCost
                     - expectedDeductionsCost
-                    + Objects.requireNonNullElse(workerDto.getMealAllowance(), 0.0) * getWorkingDays(timesheetEntity);
+                    + Objects.requireNonNullElse(timesheetEntity.getWorkerHistory().getMealAllowance(), 0.0) * getWorkingDays(timesheetEntity);
 
             case CONTRACTOR ->
                     ((timesheetEntity.getTotalHours() - timesheetEntity.getTotalExtraHours()) * hourlyRate) + expectedExtraHoursCost;
@@ -136,8 +136,8 @@ public class WageServiceImpl implements WageService {
 
         double expectedInternalCost = switch (workerDto.getWorkerContractType()) {
             case INTERNAL -> expectedWage
-                    + workerDto.getAccidentInsurance()
-                    + ((workerDto.getMonthlySalary() + expectedExtraHoursCost - expectedDeductionsCost) * workerDto.getTsu() / 100);
+                    + timesheetEntity.getWorkerHistory().getAccidentInsurance()
+                    + ((timesheetEntity.getWorkerHistory().getMonthlySalary() + expectedExtraHoursCost - expectedDeductionsCost) * timesheetEntity.getWorkerHistory().getTsu() / 100);
 
             case CONTRACTOR -> expectedWage;
         };

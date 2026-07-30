@@ -136,8 +136,8 @@ public class TimesheetServiceImpl implements TimesheetService {
             }
 
             validateInternalWorkerHours(timesheet, worker);
-            updateExpectedHours(timesheet, worker);
-            updateTotals(timesheet, worker);
+            updateExpectedHours(timesheet);
+            updateTotals(timesheet);
             timesheetRepository.save(timesheet);
         }
     }
@@ -175,14 +175,14 @@ public class TimesheetServiceImpl implements TimesheetService {
 
             double hours = hoursPerDay.getOrDefault(day, 0.0);
 
-            if (hours < worker.getDefaultHours()) {
+            if (hours < timesheet.getWorkerHistory().getDefaultHours()) {
                 throw new IllegalArgumentException(String.format("Worker '%s' has %.1f hours on %s but should have at" +
-                        " least %.1f.", worker.getName(), hours, day, worker.getDefaultHours()));
+                        " least %.1f.", worker.getName(), hours, day, timesheet.getWorkerHistory().getDefaultHours()));
             }
         }
     }
 
-    private void updateExpectedHours(TimesheetEntity timesheet, WorkerDto worker) {
+    private void updateExpectedHours(TimesheetEntity timesheet) {
         LocalDate firstDay = LocalDate.of(timesheet.getYear(), timesheet.getMonth(), 1);
         LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
 
@@ -202,10 +202,10 @@ public class TimesheetServiceImpl implements TimesheetService {
             workingDays++;
         }
 
-        timesheet.setExpectedHours(worker.getDefaultHours() * workingDays);
+        timesheet.setExpectedHours(timesheet.getWorkerHistory().getDefaultHours() * workingDays);
     }
 
-    private void updateTotals(TimesheetEntity timesheet, WorkerDto worker) {
+    private void updateTotals(TimesheetEntity timesheet) {
         double totalNormalHours = 0.0;
         double totalExtraHours = 0.0;
         double totalPaidAbsenceHours = 0.0;
@@ -246,8 +246,8 @@ public class TimesheetServiceImpl implements TimesheetService {
 
         // Split work hours into normal and extra (per day)
         for (double workedHours : workHoursPerDay.values()) {
-            totalNormalHours += Math.min(workedHours, worker.getDefaultHours());
-            totalExtraHours += Math.max(0.0, workedHours - worker.getDefaultHours());
+            totalNormalHours += Math.min(workedHours, timesheet.getWorkerHistory().getDefaultHours());
+            totalExtraHours += Math.max(0.0, workedHours - timesheet.getWorkerHistory().getDefaultHours());
         }
 
         timesheet.setTotalHours(totalNormalHours + totalExtraHours + totalPaidAbsenceHours + totalUnpaidAbsenceHours);

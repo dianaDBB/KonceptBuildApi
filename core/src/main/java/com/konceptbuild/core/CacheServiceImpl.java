@@ -1,17 +1,8 @@
 package com.konceptbuild.core;
 
-import com.konceptbuild.core.dto.ClientDto;
-import com.konceptbuild.core.dto.WageDto;
-import com.konceptbuild.core.dto.WorkDto;
-import com.konceptbuild.core.dto.WorkerDto;
-import com.konceptbuild.core.entity.ClientEntity;
-import com.konceptbuild.core.entity.WageEntity;
-import com.konceptbuild.core.entity.WorkEntity;
-import com.konceptbuild.core.entity.WorkerEntity;
-import com.konceptbuild.core.repository.ClientRepository;
-import com.konceptbuild.core.repository.WageRepository;
-import com.konceptbuild.core.repository.WorkRepository;
-import com.konceptbuild.core.repository.WorkerRepository;
+import com.konceptbuild.core.dto.*;
+import com.konceptbuild.core.entity.*;
+import com.konceptbuild.core.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -26,6 +17,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class CacheServiceImpl implements CacheService {
+    @Autowired
+    private WorkerHistoryRepository workerHistoryRepository;
 
     @Autowired
     private WorkerRepository workerRepository;
@@ -40,6 +33,8 @@ public class CacheServiceImpl implements CacheService {
     private WageRepository wageRepository;
 
     private volatile List<WorkerDto> workers = List.of();
+
+    private volatile List<WorkerHistoryDto> workersHistory = List.of();
 
     private volatile List<ClientDto> clients = List.of();
 
@@ -56,8 +51,14 @@ public class CacheServiceImpl implements CacheService {
     @Override
     @Transactional(readOnly = true)
     public synchronized void refreshCache() {
+        List<WorkerHistoryEntity> allWorkersHistory = workerHistoryRepository.findAll(Sort.by(Sort.Direction.ASC, "workerId"));
+        workersHistory = allWorkersHistory.stream().map(WorkerHistoryDto::new).collect(Collectors.toList());
+
+        Map<UUID, WorkerHistoryDto> workerHistoryById = workerHistoryRepository.findByValidToIsNull().stream()
+                .collect(Collectors.toMap(history -> history.getWorker().getId(), WorkerHistoryDto::new));
+
         List<WorkerEntity> allWorkers = workerRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
-        workers = allWorkers.stream().map(WorkerDto::new).collect(Collectors.toList());
+        workers = allWorkers.stream().map(worker -> new WorkerDto(worker, workerHistoryById.get(worker.getId()))).toList();
 
         List<ClientEntity> allClients = clientRepository.findAll(Sort.by(Sort.Direction.ASC, "companyName"));
         clients = allClients.stream().map(ClientDto::new).collect(Collectors.toList());

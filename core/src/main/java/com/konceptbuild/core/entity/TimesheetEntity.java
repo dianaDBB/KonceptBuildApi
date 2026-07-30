@@ -22,6 +22,10 @@ public class TimesheetEntity {
     @JoinColumn(name = "worker_id", nullable = false, foreignKey = @ForeignKey(name = "fk_worker"))
     private WorkerEntity worker;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "worker_history_id", nullable = false, foreignKey = @ForeignKey(name = "fk_worker_history"))
+    private WorkerHistoryEntity workerHistory;
+
     @Column(name = "year", nullable = false)
     private int year;
 

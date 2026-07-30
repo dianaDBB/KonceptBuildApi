@@ -27,7 +27,7 @@ public class WorkerTimesheetDto {
 
     public WorkerTimesheetDto(TimesheetEntity entity) {
         this.timesheetId = entity.getId();
-        this.worker = new WorkerDto(entity.getWorker());
+        this.worker = new WorkerDto(entity.getWorker(), new WorkerHistoryDto(entity.getWorkerHistory()));
         this.expectedHours = entity.getExpectedHours();
         this.totalHours = entity.getTotalHours();
         this.totalExtraHours = entity.getTotalExtraHours();

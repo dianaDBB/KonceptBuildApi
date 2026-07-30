@@ -2,13 +2,13 @@ package com.konceptbuild.core.validator;
 
 import com.konceptbuild.core.enums.WorkerContractType;
 import com.konceptbuild.core.enums.Status;
-import com.konceptbuild.core.request.WorkerRequest;
+import com.konceptbuild.core.request.AddWorkerRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class WorkerValidator implements ConstraintValidator<ValidWorker, WorkerRequest> {
+public class AddWorkerValidator implements ConstraintValidator<ValidWorker, AddWorkerRequest> {
     @Override
-    public boolean isValid(WorkerRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(AddWorkerRequest request, ConstraintValidatorContext context) {
         if (request.defaultHours() < 0) {
             context.buildConstraintViolationWithTemplate("Default hours must be >= 0")
                     .addPropertyNode("defaultHours")

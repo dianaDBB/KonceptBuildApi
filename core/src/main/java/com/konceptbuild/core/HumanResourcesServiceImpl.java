@@ -41,7 +41,7 @@ public class HumanResourcesServiceImpl implements HumanResourcesService {
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Worker not found: " + timesheet.getWorker().getId()));
 
-            double hourCost = worker.getHourCost();
+            double hourCost = worker.getCurrentWorkerCompensation().getHourCost();
 
             for (TimesheetLineEntity line : timesheet.getTimesheetLineEntities()) {
 

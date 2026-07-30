@@ -2,7 +2,9 @@ package com.konceptbuild.core;
 
 import com.konceptbuild.core.dto.WorkerDto;
 import com.konceptbuild.core.filter.WorkerFilter;
-import com.konceptbuild.core.request.WorkerRequest;
+import com.konceptbuild.core.request.AddWorkerRequest;
+import com.konceptbuild.core.request.UpdateWorkerRequest;
+import com.konceptbuild.core.request.UpdateWorkerCompensationRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,9 +14,11 @@ import java.util.UUID;
 public interface WorkerService {
     List<WorkerDto> search(WorkerFilter filter);
 
-    void add(WorkerRequest request);
+    void add(AddWorkerRequest request);
 
-    void update(WorkerRequest request);
+    void update(UpdateWorkerRequest request);
+
+    void updateCompensation(UpdateWorkerCompensationRequest request);
 
     void delete(UUID id);
 }

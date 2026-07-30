@@ -32,6 +32,9 @@ public class WageEntity {
     @JoinColumn(name = "worker_id", nullable = false, foreignKey = @ForeignKey(name = "fk_worker"))
     private WorkerEntity worker;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "worker_history_id", nullable = false, foreignKey = @ForeignKey(name = "fk_worker_history_id"))
+    private WorkerHistoryEntity workerHistory;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "timesheet_id", nullable = false, foreignKey = @ForeignKey(name = "fk_timesheet"))

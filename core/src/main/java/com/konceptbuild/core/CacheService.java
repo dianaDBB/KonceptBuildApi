@@ -1,9 +1,6 @@
 package com.konceptbuild.core;
 
-import com.konceptbuild.core.dto.ClientDto;
-import com.konceptbuild.core.dto.WageDto;
-import com.konceptbuild.core.dto.WorkDto;
-import com.konceptbuild.core.dto.WorkerDto;
+import com.konceptbuild.core.dto.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

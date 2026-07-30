@@ -3,7 +3,9 @@ package com.konceptbuild.adapters.rest;
 import com.konceptbuild.core.WorkerService;
 import com.konceptbuild.core.dto.*;
 import com.konceptbuild.core.filter.WorkerFilter;
-import com.konceptbuild.core.request.WorkerRequest;
+import com.konceptbuild.core.request.AddWorkerRequest;
+import com.konceptbuild.core.request.UpdateWorkerRequest;
+import com.konceptbuild.core.request.UpdateWorkerCompensationRequest;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -37,7 +39,7 @@ public class WorkerController {
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Add a new worker")
     @ApiResponse(responseCode = "200", description = "Worker added successfully")
-    public ResponseEntity<Void> add(@Valid @RequestBody WorkerRequest request) {
+    public ResponseEntity<Void> add(@Valid @RequestBody AddWorkerRequest request) {
         workerService.add(request);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -45,9 +47,16 @@ public class WorkerController {
     @PutMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Edit an existing worker")
     @ApiResponse(responseCode = "200", description = "Worker edited successfully")
-    public ResponseEntity<Void> update(@Valid @RequestBody WorkerRequest request) {
+    public ResponseEntity<Void> update(@Valid @RequestBody UpdateWorkerRequest request) {
         workerService.update(request);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/compensation")
+    public ResponseEntity<Void> updateCompensation(@Valid @RequestBody UpdateWorkerCompensationRequest request) {
+        workerService.updateCompensation(request);
+
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

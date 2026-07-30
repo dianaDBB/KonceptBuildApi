@@ -26,18 +26,12 @@ public class WorkerDto {
     private String phoneCountryCode;
     private String email;
     private String function;
-    private Double hourCost;
-    private Double defaultHours;
     private WorkerContractType workerContractType;
-    private Double hourRate;
-    private Double monthlySalary;
-    private Double tsu;
-    private Double mealAllowance;
-    private Double accidentInsurance;
     private LocalDate startDate;
     private LocalDate endDate;
+    private WorkerHistoryDto currentWorkerCompensation;
 
-    public WorkerDto(WorkerEntity entity) {
+    public WorkerDto(WorkerEntity entity, WorkerHistoryDto currentWorkerHistoryDto) {
         this.id = entity.getId();
         this.codeNumber = entity.getCodeNumber();
         this.code = entity.getCode();
@@ -48,16 +42,10 @@ public class WorkerDto {
         this.phone = entity.getPhone();
         this.email = entity.getEmail();
         this.function = entity.getFunction();
-        this.hourCost = entity.getHourCost();
-        this.defaultHours = entity.getDefaultHours();
         this.workerContractType = entity.getWorkerContractType();
-        this.hourRate = entity.getHourRate();
-        this.monthlySalary = entity.getMonthlySalary();
-        this.tsu = entity.getTsu();
-        this.mealAllowance = entity.getMealAllowance();
-        this.accidentInsurance = entity.getAccidentInsurance();
         this.startDate = entity.getStartDate();
         this.endDate = entity.getEndDate();
+        this.currentWorkerCompensation = currentWorkerHistoryDto;
     }
 
     public boolean isActiveDuringPeriod(LocalDate startDate, LocalDate endDate, LocalDate periodStart,
