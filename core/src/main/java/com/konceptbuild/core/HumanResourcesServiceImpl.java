@@ -36,15 +36,13 @@ public class HumanResourcesServiceImpl implements HumanResourcesService {
         Map<UUID, HrDashboardRowDto> workMap = new LinkedHashMap<>();
 
         for (TimesheetEntity timesheet : timesheets) {
-
             WorkerDto worker = cacheService.getWorker(timesheet.getWorker().getId())
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Worker not found: " + timesheet.getWorker().getId()));
 
-            double hourCost = worker.getCurrentWorkerCompensation().getHourCost();
+            double hourCost = timesheet.getWorkerHistory().getHourCost();
 
             for (TimesheetLineEntity line : timesheet.getTimesheetLineEntities()) {
-
                 if (line.getWork() == null) {
                     continue;
                 }

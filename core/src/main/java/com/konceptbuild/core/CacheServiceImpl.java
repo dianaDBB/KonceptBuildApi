@@ -51,14 +51,16 @@ public class CacheServiceImpl implements CacheService {
     @Override
     @Transactional(readOnly = true)
     public synchronized void refreshCache() {
-        List<WorkerHistoryEntity> allWorkersHistory = workerHistoryRepository.findAll(Sort.by(Sort.Direction.ASC, "workerId"));
+        List<WorkerHistoryEntity> allWorkersHistory = workerHistoryRepository.findAll(Sort.by(Sort.Direction.ASC,
+                "workerId"));
         workersHistory = allWorkersHistory.stream().map(WorkerHistoryDto::new).collect(Collectors.toList());
 
         Map<UUID, WorkerHistoryDto> workerHistoryById = workerHistoryRepository.findByValidToIsNull().stream()
                 .collect(Collectors.toMap(history -> history.getWorker().getId(), WorkerHistoryDto::new));
 
         List<WorkerEntity> allWorkers = workerRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
-        workers = allWorkers.stream().map(worker -> new WorkerDto(worker, workerHistoryById.get(worker.getId()))).toList();
+        workers =
+                allWorkers.stream().map(worker -> new WorkerDto(worker, workerHistoryById.get(worker.getId()))).toList();
 
         List<ClientEntity> allClients = clientRepository.findAll(Sort.by(Sort.Direction.ASC, "companyName"));
         clients = allClients.stream().map(ClientDto::new).collect(Collectors.toList());
@@ -119,5 +121,18 @@ public class CacheServiceImpl implements CacheService {
     @Override
     public List<WageDto> getAllWages() {
         return new ArrayList<>(wages);
+    }
+
+    @Override
+    public Optional<WorkerHistoryDto> getWorkerHistory(UUID workerId, Integer year, Integer month) {
+        LocalDate date = LocalDate.of(year, month, 1);
+
+        return workersHistory.stream()
+                .filter(h -> h.getWorkerId().equals(workerId))
+                .filter(h ->
+                        !h.getValidFrom().isAfter(date) &&
+                                (h.getValidTo() == null || !h.getValidTo().isBefore(date))
+                )
+                .findFirst();
     }
 }

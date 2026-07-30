@@ -53,17 +53,24 @@ public class WorkerServiceImpl implements WorkerService {
                 .filter(worker -> matchesString(worker.getPhone(), filter.phone()))
                 .filter(worker -> matchesString(worker.getEmail(), filter.email()))
                 .filter(worker -> matchesString(worker.getFunction(), filter.function()))
-                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getHourCost(), filter.hourCostMin(), filter.hourCostMax()))
-                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getDefaultHours(), filter.defaultHoursMin(),
+                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getHourCost(),
+                        filter.hourCostMin(), filter.hourCostMax()))
+                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getDefaultHours(),
+                        filter.defaultHoursMin(),
                         filter.defaultHoursMax()))
                 .filter(worker -> filter.workerContractType() == null || filter.workerContractType() == worker.getWorkerContractType())
-                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getHourRate(), filter.hourRateMin(), filter.hourRateMax()))
-                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getMonthlySalary(), filter.monthlySalaryMin(),
+                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getHourRate(),
+                        filter.hourRateMin(), filter.hourRateMax()))
+                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getMonthlySalary(),
+                        filter.monthlySalaryMin(),
                         filter.monthlySalaryMax()))
-                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getTsu(), filter.tsuMin(), filter.tsuMax()))
-                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getMealAllowance(), filter.mealAllowanceMin(),
+                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getTsu(), filter.tsuMin(),
+                        filter.tsuMax()))
+                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getMealAllowance(),
+                        filter.mealAllowanceMin(),
                         filter.mealAllowanceMax()))
-                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getAccidentInsurance(), filter.accidentInsuranceMin(),
+                .filter(worker -> isWithinRange(worker.getCurrentWorkerCompensation().getAccidentInsurance(),
+                        filter.accidentInsuranceMin(),
                         filter.accidentInsuranceMax()))
                 .filter(worker -> isWithinRange(worker.getStartDate(), filter.startDateMin(), filter.startDateMax()))
                 .filter(worker -> isWithinRange(worker.getEndDate(), filter.endDateMin(), filter.endDateMax()))
@@ -111,18 +118,31 @@ public class WorkerServiceImpl implements WorkerService {
             case PHONE -> Comparator.comparing(WorkerDto::getPhone, stringComparator);
             case EMAIL -> Comparator.comparing(WorkerDto::getEmail, stringComparator);
             case FUNCTION -> Comparator.comparing(WorkerDto::getFunction, stringComparator);
-            case HOUR_COST -> Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getHourCost(), doubleComparator);
-            case DEFAULT_HOURS -> Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getDefaultHours(), doubleComparator);
+            case HOUR_COST ->
+                    Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getHourCost(),
+                            doubleComparator);
+            case DEFAULT_HOURS ->
+                    Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getDefaultHours(),
+                            doubleComparator);
             case CONTRACT_TYPE -> Comparator.comparing(
                     WorkerDto::getWorkerContractType,
                     sortDirection == SortDirection.DESC
                             ? Comparator.nullsLast(Comparator.reverseOrder())
                             : Comparator.nullsLast(Comparator.naturalOrder()));
-            case HOUR_RATE -> Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getHourRate(), doubleComparator);
-            case MONTHLY_SALARY -> Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getMonthlySalary(), doubleComparator);
-            case TSU -> Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getTsu(), doubleComparator);
-            case MEAL_ALLOWANCE -> Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getMealAllowance(), doubleComparator);
-            case ACCIDENT_INSURANCE -> Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getAccidentInsurance(), doubleComparator);
+            case HOUR_RATE ->
+                    Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getHourRate(),
+                            doubleComparator);
+            case MONTHLY_SALARY ->
+                    Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getMonthlySalary(),
+                            doubleComparator);
+            case TSU ->
+                    Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getTsu(), doubleComparator);
+            case MEAL_ALLOWANCE ->
+                    Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getMealAllowance(),
+                            doubleComparator);
+            case ACCIDENT_INSURANCE ->
+                    Comparator.comparing(worker -> worker.getCurrentWorkerCompensation().getAccidentInsurance(),
+                            doubleComparator);
             case START_DATE -> Comparator.comparing(WorkerDto::getStartDate, dateComparator);
             case END_DATE -> Comparator.comparing(WorkerDto::getEndDate, dateComparator);
         };

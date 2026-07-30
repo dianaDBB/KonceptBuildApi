@@ -41,7 +41,14 @@ public class TimesheetServiceImpl implements TimesheetService {
         for (WorkerDto worker : workers) {
             TimesheetEntity timesheet = timesheetByWorker.get(worker.getId());
 
-            WorkerTimesheetDto workerDto = WorkerTimesheetDto
+            WorkerHistoryDto workerHistory = cacheService
+                    .getWorkerHistory(worker.getId(), year, month)
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "No worker history found for " + worker.getName()));
+
+            worker.setCurrentWorkerCompensation(workerHistory);
+
+            WorkerTimesheetDto workerTimesheetDto = WorkerTimesheetDto
                     .builder()
                     .worker(worker)
                     .expectedHours(0.0)
@@ -50,16 +57,16 @@ public class TimesheetServiceImpl implements TimesheetService {
                     .build();
 
             if (timesheet != null) {
-                workerDto.setTimesheetId(timesheet.getId());
-                workerDto.setWorksTimesheet(buildLines(timesheet));
+                workerTimesheetDto.setTimesheetId(timesheet.getId());
+                workerTimesheetDto.setWorksTimesheet(buildLines(timesheet));
 
-                workerDto.setExpectedHours(timesheet.getExpectedHours());
-                workerDto.setTotalHours(timesheet.getTotalHours());
-                workerDto.setTotalExtraHours(timesheet.getTotalExtraHours());
-                workerDto.setTotalPaidAbsenceHours(timesheet.getTotalPaidAbsenceHours());
-                workerDto.setTotalUnpaidAbsenceHours(timesheet.getTotalUnpaidAbsenceHours());
+                workerTimesheetDto.setExpectedHours(timesheet.getExpectedHours());
+                workerTimesheetDto.setTotalHours(timesheet.getTotalHours());
+                workerTimesheetDto.setTotalExtraHours(timesheet.getTotalExtraHours());
+                workerTimesheetDto.setTotalPaidAbsenceHours(timesheet.getTotalPaidAbsenceHours());
+                workerTimesheetDto.setTotalUnpaidAbsenceHours(timesheet.getTotalUnpaidAbsenceHours());
             }
-            workerDtoList.add(workerDto);
+            workerDtoList.add(workerTimesheetDto);
         }
 
         workerDtoList.sort(Comparator.comparing(dto -> dto.getWorker().getName()));
@@ -135,6 +142,13 @@ public class TimesheetServiceImpl implements TimesheetService {
                 timesheet.getTimesheetLineEntities().add(line);
             }
 
+            WorkerHistoryDto workerHistory = cacheService
+                    .getWorkerHistory(worker.getId(), dto.getYear(), dto.getMonth())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "No worker history found for " + worker.getName()));
+
+            timesheet.setWorkerHistory(new WorkerHistoryEntity(workerHistory));
+
             validateInternalWorkerHours(timesheet, worker);
             updateExpectedHours(timesheet);
             updateTotals(timesheet);
@@ -144,6 +158,10 @@ public class TimesheetServiceImpl implements TimesheetService {
 
     private void validateInternalWorkerHours(TimesheetEntity timesheet, WorkerDto worker) {
         if (worker.getWorkerContractType() != WorkerContractType.INTERNAL) {
+            return;
+        }
+
+        if (timesheet.getTimesheetLineEntities().isEmpty()) {
             return;
         }
 

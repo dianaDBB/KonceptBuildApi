@@ -55,7 +55,6 @@ public class WorkerController {
     @PutMapping("/compensation")
     public ResponseEntity<Void> updateCompensation(@Valid @RequestBody UpdateWorkerCompensationRequest request) {
         workerService.updateCompensation(request);
-
         return ResponseEntity.ok().build();
     }
 

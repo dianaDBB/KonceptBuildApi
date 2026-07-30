@@ -1,5 +1,6 @@
 package com.konceptbuild.core.entity;
 
+import com.konceptbuild.core.dto.WorkerHistoryDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -48,4 +49,17 @@ public class WorkerHistoryEntity {
 
     @Column(name = "valid_to")
     private LocalDate validTo;
+
+    public WorkerHistoryEntity(WorkerHistoryDto dto) {
+        this.id = dto.getId();
+        this.hourCost = dto.getHourCost();
+        this.defaultHours = dto.getDefaultHours();
+        this.hourRate = dto.getHourRate();
+        this.monthlySalary = dto.getMonthlySalary();
+        this.tsu = dto.getTsu();
+        this.mealAllowance = dto.getMealAllowance();
+        this.accidentInsurance = dto.getAccidentInsurance();
+        this.validFrom = dto.getValidFrom();
+        this.validTo = dto.getValidTo();
+    }
 }

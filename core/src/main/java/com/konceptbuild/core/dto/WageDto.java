@@ -19,7 +19,6 @@ public class WageDto {
     private String code;
     private Integer year;
     private Integer month;
-    private WorkerDto workerDto;
     private WorkerTimesheetDto workerTimesheetDto;
     private Double expectedWage;
     private Double expectedExtraHours;
@@ -35,7 +34,6 @@ public class WageDto {
         this.code = entity.getCode();
         this.year = entity.getYear();
         this.month = entity.getMonth();
-        this.workerDto = new WorkerDto(entity.getWorker(), new WorkerHistoryDto(entity.getWorkerHistory()));
         this.workerTimesheetDto = new WorkerTimesheetDto(entity.getTimesheet());
         this.expectedWage = entity.getExpectedWage();
         this.expectedExtraHours = entity.getExpectedExtraHours();

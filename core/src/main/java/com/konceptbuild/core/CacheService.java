@@ -24,4 +24,6 @@ public interface CacheService {
     Optional<WorkDto> getWork(UUID id);
 
     List<WageDto> getAllWages();
+
+    Optional<WorkerHistoryDto> getWorkerHistory(UUID workerId, Integer year, Integer month);
 }
