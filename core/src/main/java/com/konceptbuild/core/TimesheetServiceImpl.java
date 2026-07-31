@@ -94,7 +94,7 @@ public class TimesheetServiceImpl implements TimesheetService {
     public void saveMonthlyTimesheet(MonthlyTimesheetDto dto) {
         for (WorkerTimesheetDto workerDto : dto.getWorkersTimesheet()) {
             WorkerDto worker =
-                    cacheService.getWorker(workerDto.getWorker().getId()).orElseThrow(() -> new IllegalArgumentException("Worker not found: " + workerDto.getWorker().getId()));
+                    cacheService.getWorkerById(workerDto.getWorker().getId()).orElseThrow(() -> new IllegalArgumentException("Worker not found: " + workerDto.getWorker().getId()));
 
             TimesheetEntity timesheet = timesheetRepository.findByWorkerIdAndYearAndMonth(worker.getId(),
                     dto.getYear(), dto.getMonth()).orElseGet(() -> {
@@ -118,7 +118,7 @@ public class TimesheetServiceImpl implements TimesheetService {
 
                 if (workDto.getWork() != null) {
                     WorkDto work =
-                            cacheService.getWork(workDto.getWork().getId()).orElseThrow(() -> new IllegalArgumentException("Work not found: " + workDto.getWork().getId()));
+                            cacheService.getWorkById(workDto.getWork().getId()).orElseThrow(() -> new IllegalArgumentException("Work not found: " + workDto.getWork().getId()));
 
                     line.setWork(new WorkEntity(work));
                 } else {

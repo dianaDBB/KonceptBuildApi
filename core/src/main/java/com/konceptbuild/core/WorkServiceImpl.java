@@ -19,7 +19,7 @@ import java.util.UUID;
 @Service
 public class WorkServiceImpl implements WorkService {
     @Autowired
-    private CacheServiceImpl cacheServiceImpl;
+    private CacheService cacheService;
 
     @Autowired
     private WorkRepository workRepository;
@@ -35,7 +35,7 @@ public class WorkServiceImpl implements WorkService {
                     .thenComparing(comparator);
         }
 
-        return cacheServiceImpl.getAllWorks().stream()
+        return cacheService.getAllWorks().stream()
                 .filter(work -> matchesString(work.getCode(), filter.code()))
                 .filter(work -> matchesString(work.getName(), filter.name()))
                 .filter(work -> filter.status() == null || filter.status() == work.getStatus())
@@ -119,7 +119,7 @@ public class WorkServiceImpl implements WorkService {
 
         WorkEntity entity = new WorkEntity(request);
         workRepository.save(entity);
-        cacheServiceImpl.refreshCache();
+        cacheService.refreshCache();
     }
 
     @Override
@@ -131,7 +131,7 @@ public class WorkServiceImpl implements WorkService {
         entity.setCodeNumber(currentEntity.getCodeNumber());
         entity.setCode(currentEntity.getCode());
         workRepository.save(entity);
-        cacheServiceImpl.refreshCache();
+        cacheService.refreshCache();
     }
 
     @Override
@@ -140,6 +140,6 @@ public class WorkServiceImpl implements WorkService {
                 .orElseThrow(() -> new EntityNotFoundException("Work with ID " + id + " not found"));
 
         workRepository.delete(entity);
-        cacheServiceImpl.refreshCache();
+        cacheService.refreshCache();
     }
 }

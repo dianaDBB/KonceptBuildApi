@@ -15,15 +15,25 @@ public interface CacheService {
 
     List<WorkerDto> getAllActiveWorkers(Integer year, Integer month);
 
-    Optional<WorkerDto> getWorker(UUID id);
+    Optional<WorkerDto> getWorkerById(UUID id);
 
     List<ClientDto> getAllClients();
 
+    Optional<ClientDto> getClientById(UUID clientId);
+
     List<WorkDto> getAllWorks();
 
-    Optional<WorkDto> getWork(UUID id);
+    Optional<WorkDto> getWorkById(UUID id);
 
     List<WageDto> getAllWages();
 
     Optional<WorkerHistoryDto> getWorkerHistory(UUID workerId, Integer year, Integer month);
+
+    List<ClientInvoiceDto> getAllClientInvoices();
+
+    Optional<ClientInvoiceDto> getClientInvoiceById(UUID invoiceId);
+
+    List<ClientPaymentDto> getAllClientPayments();
+
+    Optional<ClientPaymentDto> getClientPaymentById(UUID paymentID);
 }

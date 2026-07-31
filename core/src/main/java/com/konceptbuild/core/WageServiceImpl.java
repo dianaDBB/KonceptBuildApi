@@ -40,13 +40,25 @@ public class WageServiceImpl implements WageService {
     public List<WageDto> search(WageFilter filter) {
         Comparator<WageDto> comparator = comparatorFor(filter.sortBy(), filter.sortDirection());
 
-        return cacheServiceImpl.getAllWages().stream().filter(wage -> isWithinRange(wage.getYear(), filter.yearMin(),
-                filter.yearMax())).filter(wage -> isWithinRange(wage.getMonth(), filter.monthMin(),
-                filter.monthMax())).filter(wage -> matchesString(wage.getWorkerTimesheetDto().getWorker().getCode(),
-                filter.workerCode())).filter(wage -> matchesString(wage.getWorkerTimesheetDto().getWorker().getName(),
-                filter.workerName())).filter(wage -> isWithinRange(wage.getExpectedWage(), filter.expectedWageMin(),
-                filter.expectedWageMax())).filter(wage -> isWithinRange(wage.getExpectedExtraHours(),
-                filter.expectedExtraHoursMin(), filter.expectedExtraHoursMax())).filter(wage -> isWithinRange(wage.getExpectedDeductions(), filter.expectedDeductionsMin(), filter.expectedDeductionsMax())).filter(wage -> isWithinRange(wage.getExpectedInternalCost(), filter.expectedInternalCostMin(), filter.expectedInternalCostMax())).filter(wage -> isWithinRange(wage.getPaidValue(), filter.paidValueMin(), filter.paidValueMax())).filter(wage -> isWithinRange(wage.getPaidDate(), filter.paidDateMin(), filter.paidDateMax())).filter(wage -> filter.paymentMethod() == null || filter.paymentMethod() == wage.getPaymentMethod()).filter(wage -> matchesString(wage.getNotes(), filter.notes())).sorted(comparator).toList();
+        return cacheServiceImpl.getAllWages().stream()
+                .filter(wage -> isWithinRange(wage.getYear(), filter.yearMin(), filter.yearMax()))
+                .filter(wage -> isWithinRange(wage.getMonth(), filter.monthMin(), filter.monthMax()))
+                .filter(wage -> matchesString(wage.getWorkerTimesheetDto().getWorker().getCode(), filter.workerCode()))
+                .filter(wage -> matchesString(wage.getWorkerTimesheetDto().getWorker().getName(), filter.workerName()))
+                .filter(wage -> isWithinRange(wage.getExpectedWage(), filter.expectedWageMin(),
+                        filter.expectedWageMax()))
+                .filter(wage -> isWithinRange(wage.getExpectedExtraHours(), filter.expectedExtraHoursMin(),
+                        filter.expectedExtraHoursMax()))
+                .filter(wage -> isWithinRange(wage.getExpectedDeductions(), filter.expectedDeductionsMin(),
+                        filter.expectedDeductionsMax()))
+                .filter(wage -> isWithinRange(wage.getExpectedInternalCost(), filter.expectedInternalCostMin(),
+                        filter.expectedInternalCostMax()))
+                .filter(wage -> isWithinRange(wage.getPaidValue(), filter.paidValueMin(), filter.paidValueMax()))
+                .filter(wage -> isWithinRange(wage.getPaidDate(), filter.paidDateMin(), filter.paidDateMax()))
+                .filter(wage -> filter.paymentMethod() == null || filter.paymentMethod() == wage.getPaymentMethod())
+                .filter(wage -> matchesString(wage.getNotes(), filter.notes()))
+                .sorted(comparator)
+                .toList();
     }
 
     private boolean matchesString(String value, String query) {
@@ -106,7 +118,7 @@ public class WageServiceImpl implements WageService {
                 request.workerId()).orElse(new WageEntity());
 
         WorkerDto workerDto =
-                cacheServiceImpl.getWorker(request.workerId())
+                cacheServiceImpl.getWorkerById(request.workerId())
                         .orElseThrow(() -> new EntityNotFoundException(
                                 "Worker not found - " + request.workerId()
                         ));

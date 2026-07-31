@@ -1,5 +1,6 @@
 package com.konceptbuild.core.entity;
 
+import com.konceptbuild.core.dto.ClientDto;
 import com.konceptbuild.core.enums.Status;
 import com.konceptbuild.core.request.ClientRequest;
 import jakarta.persistence.*;
@@ -81,5 +82,21 @@ public class ClientEntity {
         this.phone = request.phone();
         this.status = request.status();
         this.note = request.note();
+    }
+
+    public ClientEntity(ClientDto dto) {
+        this.id = dto.getId();
+        this.companyName = dto.getCompanyName();
+        this.address = dto.getAddress();
+        this.postalCode = dto.getPostalCode();
+        this.city = dto.getCity();
+        this.district = dto.getDistrict();
+        this.nif = dto.getNif();
+        this.contact = dto.getContact();
+        this.email = dto.getEmail();
+        this.phoneCountryCode = dto.getPhoneCountryCode();
+        this.phone = dto.getPhone();
+        this.status = dto.getStatus();
+        this.note = dto.getNote();
     }
 }
