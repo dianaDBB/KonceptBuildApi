@@ -16,4 +16,6 @@ public interface ConfigsService {
     List<AttendanceCodeDto> getAttendanceCodes();
 
     List<PaymentMethodDto> getPaymentMethod();
+
+    List<ClientPaymentTypeDto> getClientPaymentTypes();
 }

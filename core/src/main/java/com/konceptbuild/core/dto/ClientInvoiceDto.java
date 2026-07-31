@@ -30,7 +30,7 @@ public class ClientInvoiceDto {
         this.id = entity.getId();
         this.docNumber = entity.getDocNumber();
         this.client = new ClientDto(entity.getClient());
-        this.work = new WorkDto(entity.getWork());
+        this.work = new WorkDto(entity.getWork(), this.client);
         this.description = entity.getDescription();
         this.valueWithoutTax = entity.getValueWithoutTax();
         this.appliedTax = entity.getAppliedTax();

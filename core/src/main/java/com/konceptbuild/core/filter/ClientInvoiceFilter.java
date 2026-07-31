@@ -1,16 +1,13 @@
 package com.konceptbuild.core.filter;
 
-import com.konceptbuild.core.dto.ClientDto;
-import com.konceptbuild.core.dto.WorkDto;
-
 import java.time.LocalDate;
 import java.util.UUID;
 
 public record ClientInvoiceFilter(
         UUID id,
         String docNumber,
-        ClientDto client,
-        WorkDto work,
+        String clientName,
+        String workName,
         String description,
         Double valueWithoutTaxMin,
         Double valueWithoutTaxMax,

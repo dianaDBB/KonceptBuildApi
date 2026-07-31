@@ -8,6 +8,9 @@ import java.util.UUID;
 
 @Data
 public class CreateClientInvoiceRequest {
+    @NotNull(message = "Document number is required")
+    String docNumber;
+
     @NotNull(message = "Client ID is required")
     UUID clientId;
 
@@ -22,12 +25,6 @@ public class CreateClientInvoiceRequest {
 
     @NotNull(message = "Applied tax value is required")
     Double appliedTax;
-
-    @NotNull(message = "Tax value value is required")
-    Double taxValue;
-
-    @NotNull(message = "Total value value is required")
-    Double totalValue;
 
     @NotNull(message = "Registration date is required")
     LocalDate registrationDate;

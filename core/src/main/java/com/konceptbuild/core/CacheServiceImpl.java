@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,10 +72,8 @@ public class CacheServiceImpl implements CacheService {
         List<ClientEntity> allClients = clientRepository.findAll(Sort.by(Sort.Direction.ASC, "companyName"));
         clients = allClients.stream().map(ClientDto::new).collect(Collectors.toList());
 
-        Map<UUID, ClientDto> clientsById = clients.stream().collect(Collectors.toMap(ClientDto::getId, Function.identity()));
-
         List<WorkEntity> allWorks = workRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
-        works = allWorks.stream().map(work -> new WorkDto(work, clientsById.get(work.getClientId()))).toList();
+        works = allWorks.stream().map(work -> new WorkDto(work, new ClientDto(work.getClient()))).toList();
 
         List<WageEntity> allWages = wageRepository.findAll(Sort.by(Sort.Direction.ASC, "code"));
         wages = allWages.stream().map(WageDto::new).toList();

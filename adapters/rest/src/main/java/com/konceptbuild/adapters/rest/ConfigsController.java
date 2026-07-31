@@ -56,4 +56,11 @@ public class ConfigsController {
     public List<PaymentMethodDto> getPaymentMethods() {
         return configsService.getPaymentMethod();
     }
+
+    @GetMapping("/client-payment-type")
+    @Operation(description = "Returns all possible client payment types")
+    @ApiResponse(responseCode = "200", description = "Client payment types retrieved successfully")
+    public List<ClientPaymentTypeDto> getClientPaymentTypes() {
+        return configsService.getClientPaymentTypes();
+    }
 }

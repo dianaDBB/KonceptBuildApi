@@ -1,6 +1,8 @@
 package com.konceptbuild.core;
 
+import com.konceptbuild.core.dto.ClientDto;
 import com.konceptbuild.core.dto.WorkDto;
+import com.konceptbuild.core.entity.ClientEntity;
 import com.konceptbuild.core.entity.WorkEntity;
 import com.konceptbuild.core.enums.WorkStatus;
 import com.konceptbuild.core.filter.*;
@@ -117,7 +119,10 @@ public class WorkServiceImpl implements WorkService {
                     throw new IllegalArgumentException("Work already defined - " + request.name());
                 });
 
-        WorkEntity entity = new WorkEntity(request);
+        ClientDto clientDto = cacheService.getClientById(request.clientId())
+                .orElseThrow(() -> new EntityNotFoundException("Client not found - " + request.clientId()));
+
+        WorkEntity entity = new WorkEntity(request, new ClientEntity(clientDto));
         workRepository.save(entity);
         cacheService.refreshCache();
     }
@@ -127,7 +132,10 @@ public class WorkServiceImpl implements WorkService {
         WorkEntity currentEntity = workRepository.findById(request.id())
                 .orElseThrow(() -> new EntityNotFoundException("Work already defined - " + request.name()));
 
-        WorkEntity entity = new WorkEntity(request);
+        ClientDto clientDto = cacheService.getClientById(request.clientId())
+                .orElseThrow(() -> new EntityNotFoundException("Client not found - " + request.clientId()));
+
+        WorkEntity entity = new WorkEntity(request, new ClientEntity(clientDto));
         entity.setCodeNumber(currentEntity.getCodeNumber());
         entity.setCode(currentEntity.getCode());
         workRepository.save(entity);

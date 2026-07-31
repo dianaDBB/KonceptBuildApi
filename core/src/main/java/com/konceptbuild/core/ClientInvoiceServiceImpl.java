@@ -30,12 +30,8 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
 
         return cacheService.getAllClientInvoices().stream()
                 .filter(invoice -> matchesString(invoice.getDocNumber(), filter.docNumber()))
-                .filter(invoice -> matchesString(invoice.getClient().getCompanyName(),
-                        filter.client().getCompanyName()))
-                .filter(invoice -> matchesString(invoice.getClient().getNif(), filter.client().getNif()))
-                .filter(invoice -> matchesString(invoice.getClient().getCode(), filter.client().getCode()))
-                .filter(invoice -> matchesString(invoice.getWork().getName(), filter.work().getName()))
-                .filter(invoice -> matchesString(invoice.getWork().getCode(), filter.work().getCode()))
+                .filter(invoice -> matchesString(invoice.getClient().getCompanyName(), filter.clientName()))
+                .filter(invoice -> matchesString(invoice.getWork().getName(), filter.workName()))
                 .filter(invoice -> matchesString(invoice.getDescription(), filter.description()))
                 .filter(invoice -> isWithinRange(invoice.getValueWithoutTax(), filter.valueWithoutTaxMin(),
                         filter.valueWithoutTaxMax()))
@@ -96,18 +92,21 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
         ClientDto client = cacheService.getClientById(request.getClientId())
                 .orElseThrow(() -> new EntityNotFoundException("Client not found - " + request.getClientId()));
 
-        WorkDto workDto = cacheService.getWorkById(request.getClientId())
-                .orElseThrow(() -> new EntityNotFoundException("Work not found - " + request.getClientId()));
+        WorkDto workDto = cacheService.getWorkById(request.getWorkId())
+                .orElseThrow(() -> new EntityNotFoundException("Work not found - " + request.getWorkId()));
 
+        Double taxValue = request.getValueWithoutTax() * (request.getAppliedTax() / 100);
+        Double totalValue = request.getValueWithoutTax() + taxValue;
         ClientInvoiceEntity invoiceEntity = ClientInvoiceEntity
                 .builder()
+                .docNumber(request.getDocNumber())
                 .client(new ClientEntity(client))
                 .work(new WorkEntity(workDto))
                 .description(request.getDescription())
                 .valueWithoutTax(request.getValueWithoutTax())
                 .appliedTax(request.getAppliedTax())
-                .taxValue(request.getTaxValue())
-                .totalValue(request.getTotalValue())
+                .taxValue(taxValue)
+                .totalValue(totalValue)
                 .registrationDate(request.getRegistrationDate())
                 .dueDate(request.getDueDate())
                 .build();
@@ -128,13 +127,16 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
                 .orElseThrow(() -> new EntityNotFoundException("Work not found - " + request.getClientId()));
 
         ClientInvoiceEntity invoiceEntity = new ClientInvoiceEntity(invoiceDto);
+        Double taxValue = request.getValueWithoutTax() * (request.getAppliedTax() / 100);
+        Double totalValue = request.getValueWithoutTax() + taxValue;
+        invoiceEntity.setDocNumber(request.getDocNumber());
         invoiceEntity.setClient(new ClientEntity(clientDto));
         invoiceEntity.setWork(new WorkEntity(workDto));
         invoiceEntity.setDescription(request.getDescription());
         invoiceEntity.setValueWithoutTax(request.getValueWithoutTax());
         invoiceEntity.setAppliedTax(request.getAppliedTax());
-        invoiceEntity.setTaxValue(request.getTaxValue());
-        invoiceEntity.setTotalValue(request.getTotalValue());
+        invoiceEntity.setTaxValue(taxValue);
+        invoiceEntity.setTotalValue(totalValue);
         invoiceEntity.setRegistrationDate(request.getRegistrationDate());
         invoiceEntity.setDueDate(request.getDueDate());
 

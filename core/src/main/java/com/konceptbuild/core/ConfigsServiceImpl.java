@@ -59,4 +59,14 @@ public class ConfigsServiceImpl implements ConfigsService {
                         .build())
                 .toList();
     }
+
+    @Override
+    public List<ClientPaymentTypeDto> getClientPaymentTypes() {
+        return Arrays.stream(ClientPaymentType.values())
+                .map(code -> ClientPaymentTypeDto.builder()
+                        .code(code.getCode())
+                        .label(code.getLabel())
+                        .build())
+                .toList();
+    }
 }

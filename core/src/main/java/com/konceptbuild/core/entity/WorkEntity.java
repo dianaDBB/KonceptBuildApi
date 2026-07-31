@@ -56,8 +56,9 @@ public class WorkEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "client_id")
-    private UUID clientId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    private ClientEntity client;
 
     public WorkEntity(WorkDto dto) {
         this.id = dto.getId();
@@ -69,10 +70,10 @@ public class WorkEntity {
         this.startDate = dto.getStartDate();
         this.estimatedEndDate = dto.getEstimatedEndDate();
         this.endDate = dto.getEndDate();
-        this.clientId = dto.getClient().getId();
+        this.client = new ClientEntity(dto.getClient());
     }
 
-    public WorkEntity(WorkRequest request) {
+    public WorkEntity(WorkRequest request, ClientEntity client) {
         this.id = request.id();
         this.name = request.name();
         this.status = request.status();
@@ -82,6 +83,6 @@ public class WorkEntity {
         this.startDate = request.startDate();
         this.estimatedEndDate = request.estimatedEndDate();
         this.endDate = request.endDate();
-        this.clientId = request.clientId();
+        this.client = client;
     }
 }
