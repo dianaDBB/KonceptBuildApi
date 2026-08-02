@@ -37,6 +37,9 @@ public class CacheServiceImpl implements CacheService {
     @Autowired
     private ClientPaymentRepository clientPaymentRepository;
 
+    @Autowired
+    private ClientPaymentInvoiceRepository clientPaymentInvoiceRepository;
+
     private volatile List<WorkerDto> workers = List.of();
 
     private volatile List<WorkerHistoryDto> workersHistory = List.of();
@@ -81,8 +84,17 @@ public class CacheServiceImpl implements CacheService {
         List<ClientInvoiceEntity> allClientInvoices = clientInvoiceRepository.findAll(Sort.by(Sort.Direction.DESC, "docNumber"));
         clientInvoices = allClientInvoices.stream().map(ClientInvoiceDto::new).toList();
 
+        List<ClientPaymentInvoiceEntity> allPaymentInvoices = clientPaymentInvoiceRepository.findAll();
+        Map<UUID, List<ClientInvoiceEntity>> invoicesByPaymentId = allPaymentInvoices.stream()
+                .collect(Collectors.groupingBy(
+                        clientPaymentInvoice -> clientPaymentInvoice.getPayment().getId(),
+                        Collectors.mapping(ClientPaymentInvoiceEntity::getInvoice, Collectors.toList())
+                ));
+
         List<ClientPaymentEntity> allClientPayments = clientPaymentRepository.findAll(Sort.by(Sort.Direction.DESC, "paymentDate"));
-        clientPayments = allClientPayments.stream().map(ClientPaymentDto::new).toList();
+        clientPayments = allClientPayments.stream()
+                .map(payment -> new ClientPaymentDto(payment, invoicesByPaymentId.getOrDefault(payment.getId(), List.of())))
+                .toList();
     }
 
     @Override

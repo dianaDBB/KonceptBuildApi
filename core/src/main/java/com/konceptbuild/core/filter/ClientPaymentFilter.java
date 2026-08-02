@@ -1,6 +1,5 @@
 package com.konceptbuild.core.filter;
 
-import com.konceptbuild.core.dto.ClientDto;
 import com.konceptbuild.core.enums.PaymentMethod;
 import com.konceptbuild.core.enums.ClientPaymentType;
 
@@ -9,7 +8,7 @@ import java.time.LocalDate;
 public record ClientPaymentFilter(
         String documentId,
         ClientPaymentType type,
-        ClientDto client,
+        String clientName,
         LocalDate paymentDateMin,
         LocalDate paymentDateMax,
         Double paidValueMin,

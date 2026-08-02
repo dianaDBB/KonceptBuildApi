@@ -7,5 +7,5 @@ public enum ClientPaymentSortField {
     PAYMENT_DATE,
     PAID_VALUE,
     PAYMENT_METHOD,
-    NOTEs
+    NOTES
 }

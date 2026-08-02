@@ -41,10 +41,7 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
         return cacheService.getAllClientPayments().stream()
                 .filter(payment -> matchesString(payment.getDocumentId(), filter.documentId()))
                 .filter(payment -> filter.type() == null || filter.type() == payment.getType())
-                .filter(payment -> matchesString(payment.getClient().getCompanyName(),
-                        filter.client().getCompanyName()))
-                .filter(payment -> matchesString(payment.getClient().getNif(), filter.client().getNif()))
-                .filter(payment -> matchesString(payment.getClient().getCode(), filter.client().getCode()))
+                .filter(payment -> matchesString(payment.getClient().getCompanyName(), filter.clientName()))
                 .filter(payment -> isWithinRange(payment.getPaymentDate(), filter.paymentDateMin(),
                         filter.paymentDateMax()))
                 .filter(payment -> isWithinRange(payment.getPaidValue(), filter.paidValueMin(), filter.paidValueMax()))
@@ -82,14 +79,14 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
             case PAYMENT_TYPE -> Comparator.comparing(ClientPaymentDto::getType, sortDirection == SortDirection.DESC ?
                     Comparator.nullsLast(Comparator.reverseOrder()) :
                     Comparator.nullsLast(Comparator.naturalOrder()));
-            case CLIENT_NAME -> Comparator.comparing(work -> work.getClient().getCompanyName(), stringComparator);
+            case CLIENT_NAME -> Comparator.comparing(client -> client.getClient().getCompanyName(), stringComparator);
             case PAYMENT_DATE -> Comparator.comparing(ClientPaymentDto::getPaymentDate, dateComparator);
             case PAID_VALUE -> Comparator.comparing(ClientPaymentDto::getPaidValue, doubleComparator);
             case PAYMENT_METHOD ->
                     Comparator.comparing(ClientPaymentDto::getPaymentMethod, sortDirection == SortDirection.DESC ?
                             Comparator.nullsLast(Comparator.reverseOrder()) :
                             Comparator.nullsLast(Comparator.naturalOrder()));
-            case NOTEs -> Comparator.comparing(ClientPaymentDto::getNotes, stringComparator);
+            case NOTES -> Comparator.comparing(ClientPaymentDto::getNotes, stringComparator);
         };
     }
 
