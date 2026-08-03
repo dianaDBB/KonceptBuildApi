@@ -3,17 +3,16 @@ package com.konceptbuild.core;
 import com.konceptbuild.core.dto.*;
 import com.konceptbuild.core.entity.*;
 import com.konceptbuild.core.filter.ClientInvoiceFilter;
-import com.konceptbuild.core.filter.ClientInvoiceSortField;
-import com.konceptbuild.core.filter.SortDirection;
 import com.konceptbuild.core.repository.ClientInvoiceRepository;
 import com.konceptbuild.core.request.CreateClientInvoiceRequest;
 import com.konceptbuild.core.request.UpdateClientInvoiceRequest;
+import com.konceptbuild.core.util.ComparatorBuilder;
+import com.konceptbuild.core.util.FilterHelper;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -26,64 +25,41 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
 
     @Override
     public List<ClientInvoiceDto> search(ClientInvoiceFilter filter) {
-        Comparator<ClientInvoiceDto> comparator = comparatorFor(filter.sortBy(), filter.sortDirection());
+        Comparator<ClientInvoiceDto> comparator = ComparatorBuilder.buildComparator(
+                filter.sortBy().fieldName(),
+                filter.sortDirection(),
+                ClientInvoiceDto.class
+        );
 
         return cacheService.getAllClientInvoices().stream()
-                .filter(invoice -> matchesString(invoice.getDocNumber(), filter.docNumber()))
-                .filter(invoice -> matchesString(invoice.getClient().getCompanyName(), filter.clientName()))
-                .filter(invoice -> matchesString(invoice.getWork().getName(), filter.workName()))
-                .filter(invoice -> matchesString(invoice.getDescription(), filter.description()))
-                .filter(invoice -> isWithinRange(invoice.getValueWithoutTax(), filter.valueWithoutTaxMin(),
-                        filter.valueWithoutTaxMax()))
-                .filter(invoice -> isWithinRange(invoice.getAppliedTax(), filter.appliedTaxMin(),
-                        filter.appliedTaxMax()))
-                .filter(invoice -> isWithinRange(invoice.getTaxValue(), filter.taxValueMin(), filter.taxValueMax()))
-                .filter(invoice -> isWithinRange(invoice.getTotalValue(), filter.totalValueMin(),
-                        filter.totalValueMax()))
-                .filter(invoice -> isWithinRange(invoice.getRegistrationDate(), filter.registrationDateMin(),
-                        filter.registrationDateMax()))
-                .filter(invoice -> isWithinRange(invoice.getDueDate(), filter.dueDateMin(), filter.dueDateMax()))
+                .filter(invoice -> FilterHelper.matchesString(invoice.getDocNumber(), filter.docNumber()))
+                .filter(invoice -> FilterHelper.matchesString(
+                        List.of(
+                                invoice.getClient().getCode(),
+                                invoice.getClient().getCompanyName(),
+                                invoice.getClient().getNif(),
+                                invoice.getClient().getContact(),
+                                invoice.getClient().getEmail(),
+                                invoice.getClient().getPhone()
+                        ),
+                        filter.client()
+                ))
+                .filter(invoice -> FilterHelper.matchesString(
+                        List.of(
+                                invoice.getWork().getCode(),
+                                invoice.getWork().getName()
+                        ),
+                        filter.work()
+                ))
+                .filter(invoice -> FilterHelper.matchesString(invoice.getDescription(), filter.description()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getValueWithoutTax(), filter.valueWithoutTax()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getAppliedTax(), filter.appliedTax()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getTaxValue(), filter.taxValue()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getTotalValue(), filter.totalValue()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getRegistrationDate(), filter.registrationDate()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getDueDate(), filter.dueDate()))
                 .sorted(comparator)
                 .toList();
-    }
-
-    private boolean matchesString(String value, String query) {
-        return query == null || (value != null && value.toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT)));
-    }
-
-    private boolean isWithinRange(Double value, Double min, Double max) {
-        return (min == null || value != null && value >= min) && (max == null || value != null && value <= max);
-    }
-
-    private boolean isWithinRange(LocalDate value, LocalDate min, LocalDate max) {
-        return value == null || (min == null || !value.isBefore(min)) && (max == null || !value.isAfter(max));
-    }
-
-    private Comparator<ClientInvoiceDto> comparatorFor(ClientInvoiceSortField field, SortDirection sortDirection) {
-        Comparator<String> stringComparator = sortDirection == SortDirection.DESC ?
-                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER.reversed()) :
-                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER);
-
-        Comparator<Double> doubleComparator = sortDirection == SortDirection.DESC ?
-                Comparator.nullsLast(Comparator.reverseOrder()) : Comparator.nullsLast(Comparator.naturalOrder());
-
-        Comparator<LocalDate> dateComparator = sortDirection == SortDirection.DESC ?
-                Comparator.nullsLast(Comparator.reverseOrder()) : Comparator.nullsLast(Comparator.naturalOrder());
-
-        return switch (field) {
-            case DOCUMENT_NUMBER -> Comparator.comparing(ClientInvoiceDto::getDocNumber, stringComparator);
-            case CLIENT_NAME ->
-                    Comparator.comparing(clientInvoice -> clientInvoice.getClient().getCompanyName(), stringComparator);
-            case WORK_NAME ->
-                    Comparator.comparing(clientInvoice -> clientInvoice.getWork().getName(), stringComparator);
-            case DESCRIPTION -> Comparator.comparing(ClientInvoiceDto::getDescription, stringComparator);
-            case VALUE_WITHOUT_TAX -> Comparator.comparing(ClientInvoiceDto::getValueWithoutTax, doubleComparator);
-            case APPLIED_TAX -> Comparator.comparing(ClientInvoiceDto::getAppliedTax, doubleComparator);
-            case TAX_VALUE -> Comparator.comparing(ClientInvoiceDto::getTaxValue, doubleComparator);
-            case TOTAL_VALUE -> Comparator.comparing(ClientInvoiceDto::getTotalValue, doubleComparator);
-            case REGISTRATION_DATE -> Comparator.comparing(ClientInvoiceDto::getRegistrationDate, dateComparator);
-            case DUE_DATE -> Comparator.comparing(ClientInvoiceDto::getDueDate, dateComparator);
-        };
     }
 
     @Transactional
@@ -153,3 +129,4 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
         cacheService.refreshCache();
     }
 }
+

@@ -45,13 +45,28 @@ public class WorkServiceImpl implements WorkService {
                 .filter(work -> FilterHelper.matchesString(work.getCode(), filter.code()))
                 .filter(work -> FilterHelper.matchesString(work.getName(), filter.name()))
                 .filter(work -> FilterHelper.matchesEnum(work.getStatus(), filter.status()))
-                .filter(work -> FilterHelper.isWithinRange(work.getContractedBudget(), filter.contractedBudgetMin(), filter.contractedBudgetMax()))
-                .filter(work -> FilterHelper.isWithinRange(work.getEstimatedCost(), filter.estimatedCostMin(), filter.estimatedCostMax()))
-                .filter(work -> FilterHelper.isWithinRange(work.getEstimatedCostMaterials(), filter.estimatedCostMaterialsMin(), filter.estimatedCostMaterialsMax()))
-                .filter(work -> FilterHelper.isWithinRange(work.getEstimatedCostLabor(), filter.estimatedCostLaborMin(), filter.estimatedCostLaborMax()))
-                .filter(work -> FilterHelper.isWithinRange(work.getEstimatedMarginEur(), filter.estimatedMarginEurMin(), filter.estimatedMarginEurMax()))
-                .filter(work -> FilterHelper.isWithinRange(work.getEstimatedMarginPercentual(), filter.estimatedMarginPercentualMin(), filter.estimatedMarginPercentualMax()))
-                .filter(work -> FilterHelper.matchesString(work.getClient().getCompanyName(), filter.clientName()))
+                .filter(work -> FilterHelper.isWithinRange(work.getContractedBudget(), filter.contractedBudget()))
+                .filter(work -> FilterHelper.isWithinRange(work.getEstimatedCost(), filter.estimatedCost()))
+                .filter(work -> FilterHelper.isWithinRange(work.getEstimatedCostMaterials(),
+                        filter.estimatedCostMaterials()))
+                .filter(work -> FilterHelper.isWithinRange(work.getEstimatedCostLabor(), filter.estimatedCostLabor()))
+                .filter(work -> FilterHelper.isWithinRange(work.getEstimatedMarginEur(), filter.estimatedMarginEur()))
+                .filter(work -> FilterHelper.isWithinRange(work.getEstimatedMarginPercentual(),
+                        filter.estimatedMarginPercentual()))
+                .filter(work -> FilterHelper.isWithinRange(work.getStartDate(), filter.startDate()))
+                .filter(work -> FilterHelper.isWithinRange(work.getEstimatedEndDate(), filter.estimatedEndDate()))
+                .filter(work -> FilterHelper.isWithinRange(work.getEndDate(), filter.endDate()))
+                .filter(invoice -> FilterHelper.matchesString(
+                        List.of(
+                                invoice.getClient().getCode(),
+                                invoice.getClient().getCompanyName(),
+                                invoice.getClient().getNif(),
+                                invoice.getClient().getContact(),
+                                invoice.getClient().getEmail(),
+                                invoice.getClient().getPhone()
+                        ),
+                        filter.client()
+                ))
                 .sorted(comparator)
                 .toList();
     }

@@ -13,7 +13,7 @@ public enum WorkSortField {
     START_DATE("startDate"),
     ESTIMATED_END_DATE("estimatedEndDate"),
     END_DATE("endDate"),
-    CLIENT_NAME("client.companyName");
+    CLIENT("client.code");
 
     private final String fieldName;
 

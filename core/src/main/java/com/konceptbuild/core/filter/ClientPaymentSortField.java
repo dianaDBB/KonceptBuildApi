@@ -3,7 +3,7 @@ package com.konceptbuild.core.filter;
 public enum ClientPaymentSortField {
     DOCUMENT_ID("documentId"),
     PAYMENT_TYPE("paymentType"),
-    CLIENT_NAME("clientName"),
+    CLIENT("client.code"),
     PAYMENT_DATE("paymentDate"),
     PAID_VALUE("paidValue"),
     PAYMENT_METHOD("paymentMethod"),

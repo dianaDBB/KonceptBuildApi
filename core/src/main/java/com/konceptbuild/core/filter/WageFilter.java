@@ -1,30 +1,23 @@
 package com.konceptbuild.core.filter;
 
 import com.konceptbuild.core.enums.PaymentMethod;
+import com.konceptbuild.core.util.FilterHelper;
 
 import java.time.LocalDate;
 
 public record WageFilter(
-        Integer yearMax,
-        Integer yearMin,
-        Integer monthMax,
-        Integer monthMin,
+        String code,
+        FilterHelper.RangeFilter<Integer> year,
+        FilterHelper.RangeFilter<Integer> month,
         String workerCode,
         String workerName,
-        Double expectedWageMin,
-        Double expectedWageMax,
-        Double expectedExtraHoursMin,
-        Double expectedExtraHoursMax,
-        Double expectedDeductionsMin,
-        Double expectedDeductionsMax,
-        Double expectedInternalCostMin,
-        Double expectedInternalCostMax,
-        Double expectedPayMin,
-        Double expectedPayMax,
-        Double paidValueMin,
-        Double paidValueMax,
-        LocalDate paidDateMin,
-        LocalDate paidDateMax,
+        FilterHelper.RangeFilter<Double> expectedWage,
+        FilterHelper.RangeFilter<Double> expectedExtraHours,
+        FilterHelper.RangeFilter<Double> expectedDeductions,
+        FilterHelper.RangeFilter<Double> expectedInternalCost,
+        FilterHelper.RangeFilter<Double> expectedPay,
+        FilterHelper.RangeFilter<Double> paidValue,
+        FilterHelper.RangeFilter<LocalDate> paidDate,
         PaymentMethod paymentMethod,
         String notes,
 
@@ -34,25 +27,5 @@ public record WageFilter(
     public WageFilter {
         sortBy = sortBy == null ? WageSortField.CODE : sortBy;
         sortDirection = sortDirection == null ? SortDirection.DESC : sortDirection;
-
-        validateRange("expectedWage", expectedWageMin, expectedWageMax);
-        validateRange("expectedExtraHours", expectedExtraHoursMin, expectedExtraHoursMax);
-        validateRange("expectedDeductions", expectedDeductionsMin, expectedDeductionsMax);
-        validateRange("expectedInternalCost", expectedInternalCostMin, expectedInternalCostMax);
-        validateRange("expectedPay", expectedPayMin, expectedPayMax);
-        validateRange("paidValue", paidValueMin, paidValueMax);
-        validateRange("paidDate", paidDateMin, paidDateMax);
-    }
-
-    private static void validateRange(String field, Double min, Double max) {
-        if (min != null && max != null && min > max) {
-            throw new IllegalArgumentException(field + " - MIN must not exceed MAX");
-        }
-    }
-
-    private static void validateRange(String field, LocalDate min, LocalDate max) {
-        if (min != null && max != null && min.isAfter(max)) {
-            throw new IllegalArgumentException(field + " - MIN must not exceed MAX");
-        }
     }
 }

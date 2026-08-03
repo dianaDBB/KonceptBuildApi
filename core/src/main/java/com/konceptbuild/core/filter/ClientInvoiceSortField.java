@@ -2,8 +2,8 @@ package com.konceptbuild.core.filter;
 
 public enum ClientInvoiceSortField {
     DOCUMENT_NUMBER("documentNumber"),
-    CLIENT_NAME("clientName"),
-    WORK_NAME("workName"),
+    CLIENT("client.code"),
+    WORK("work.code"),
     DESCRIPTION("description"),
     VALUE_WITHOUT_TAX("valueWithoutTax"),
     APPLIED_TAX("appliedTax"),

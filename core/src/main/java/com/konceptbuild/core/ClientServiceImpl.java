@@ -20,7 +20,7 @@ import java.util.UUID;
 @Service
 public class ClientServiceImpl implements ClientService {
     @Autowired
-    private CacheServiceImpl cacheServiceImpl;
+    private CacheService cacheService;
 
     @Autowired
     private ClientRepository clientRepository;
@@ -40,7 +40,7 @@ public class ClientServiceImpl implements ClientService {
                     .thenComparing(comparator);
         }
 
-        return cacheServiceImpl.getAllClients().stream()
+        return cacheService.getAllClients().stream()
                 .filter(client -> FilterHelper.matchesString(client.getCode(), filter.code()))
                 .filter(client -> FilterHelper.matchesString(client.getCompanyName(), filter.companyName()))
                 .filter(client -> FilterHelper.matchesString(client.getAddress(), filter.address()))
@@ -67,7 +67,7 @@ public class ClientServiceImpl implements ClientService {
 
         ClientEntity entity = new ClientEntity(request);
         clientRepository.save(entity);
-        cacheServiceImpl.refreshCache();
+        cacheService.refreshCache();
     }
 
     @Override
@@ -80,7 +80,7 @@ public class ClientServiceImpl implements ClientService {
         entity.setCodeNumber(currentEntity.getCodeNumber());
         entity.setCode(currentEntity.getCode());
         clientRepository.save(entity);
-        cacheServiceImpl.refreshCache();
+        cacheService.refreshCache();
     }
 
     @Override
@@ -89,6 +89,6 @@ public class ClientServiceImpl implements ClientService {
                 .orElseThrow(() -> new EntityNotFoundException("Client with ID " + id + " not found"));
 
         clientRepository.delete(entity);
-        cacheServiceImpl.refreshCache();
+        cacheService.refreshCache();
     }
 }
