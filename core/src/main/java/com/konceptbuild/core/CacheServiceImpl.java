@@ -5,6 +5,8 @@ import com.konceptbuild.core.entity.*;
 import com.konceptbuild.core.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -40,20 +42,6 @@ public class CacheServiceImpl implements CacheService {
     @Autowired
     private ClientPaymentInvoiceRepository clientPaymentInvoiceRepository;
 
-    private volatile List<WorkerDto> workers = List.of();
-
-    private volatile List<WorkerHistoryDto> workersHistory = List.of();
-
-    private volatile List<ClientDto> clients = List.of();
-
-    private volatile List<WorkDto> works = List.of();
-
-    private volatile List<WageDto> wages = List.of();
-
-    private volatile List<ClientInvoiceDto> clientInvoices = List.of();
-
-    private volatile List<ClientPaymentDto> clientPayments = List.of();
-
     @EventListener(ApplicationReadyEvent.class)
     @Transactional(readOnly = true)
     public void loadCache() {
@@ -62,44 +50,27 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     @Transactional(readOnly = true)
-    public synchronized void refreshCache() {
-        List<WorkerHistoryEntity> allWorkersHistory = workerHistoryRepository.findAll(Sort.by(Sort.Direction.ASC, "workerId"));
-        workersHistory = allWorkersHistory.stream().map(WorkerHistoryDto::new).collect(Collectors.toList());
+    @CacheEvict(allEntries = true, cacheNames = {"workers", "clients", "works", "wages", "invoices", "payments", "workerHistory"})
+    public void refreshCache() {
+        getAllWorkers();
+        getAllClients();
+        getAllWorks();
+        getAllWages();
+        getAllClientInvoices();
+        getAllClientPayments();
+    }
 
+
+    @Override
+    @Cacheable(value = "workers")
+    public List<WorkerDto> getAllWorkers() {
         Map<UUID, WorkerHistoryDto> workerHistoryById = workerHistoryRepository.findByValidToIsNull().stream()
                 .collect(Collectors.toMap(history -> history.getWorker().getId(), WorkerHistoryDto::new));
 
         List<WorkerEntity> allWorkers = workerRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
-        workers = allWorkers.stream().map(worker -> new WorkerDto(worker, workerHistoryById.get(worker.getId()))).toList();
-
-        List<ClientEntity> allClients = clientRepository.findAll(Sort.by(Sort.Direction.ASC, "companyName"));
-        clients = allClients.stream().map(ClientDto::new).collect(Collectors.toList());
-
-        List<WorkEntity> allWorks = workRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
-        works = allWorks.stream().map(work -> new WorkDto(work, new ClientDto(work.getClient()))).toList();
-
-        List<WageEntity> allWages = wageRepository.findAll(Sort.by(Sort.Direction.ASC, "code"));
-        wages = allWages.stream().map(WageDto::new).toList();
-
-        List<ClientInvoiceEntity> allClientInvoices = clientInvoiceRepository.findAll(Sort.by(Sort.Direction.DESC, "docNumber"));
-        clientInvoices = allClientInvoices.stream().map(ClientInvoiceDto::new).toList();
-
-        List<ClientPaymentInvoiceEntity> allPaymentInvoices = clientPaymentInvoiceRepository.findAll();
-        Map<UUID, List<ClientInvoiceEntity>> invoicesByPaymentId = allPaymentInvoices.stream()
-                .collect(Collectors.groupingBy(
-                        clientPaymentInvoice -> clientPaymentInvoice.getPayment().getId(),
-                        Collectors.mapping(ClientPaymentInvoiceEntity::getInvoice, Collectors.toList())
-                ));
-
-        List<ClientPaymentEntity> allClientPayments = clientPaymentRepository.findAll(Sort.by(Sort.Direction.DESC, "paymentDate"));
-        clientPayments = allClientPayments.stream()
-                .map(payment -> new ClientPaymentDto(payment, invoicesByPaymentId.getOrDefault(payment.getId(), List.of())))
+        return allWorkers.stream()
+                .map(worker -> new WorkerDto(worker, workerHistoryById.get(worker.getId())))
                 .toList();
-    }
-
-    @Override
-    public List<WorkerDto> getAllWorkers() {
-        return new ArrayList<>(workers);
     }
 
     @Override
@@ -117,18 +88,22 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
+    @Cacheable(value = "workers", key = "#id")
     public Optional<WorkerDto> getWorkerById(UUID id) {
         return this.getAllWorkers().stream()
-                .filter(work -> work.getId().equals(id))
+                .filter(worker -> worker.getId().equals(id))
                 .findFirst();
     }
 
     @Override
+    @Cacheable(value = "clients")
     public List<ClientDto> getAllClients() {
-        return new ArrayList<>(clients);
+        List<ClientEntity> allClients = clientRepository.findAll(Sort.by(Sort.Direction.ASC, "companyName"));
+        return allClients.stream().map(ClientDto::new).toList();
     }
 
     @Override
+    @Cacheable(value = "clients", key = "#clientId")
     public Optional<ClientDto> getClientById(UUID clientId) {
         return this.getAllClients().stream()
                 .filter(client -> client.getId().equals(clientId))
@@ -136,11 +111,16 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
+    @Cacheable(value = "works")
     public List<WorkDto> getAllWorks() {
-        return new ArrayList<>(works);
+        List<WorkEntity> allWorks = workRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
+        return allWorks.stream()
+                .map(work -> new WorkDto(work, new ClientDto(work.getClient())))
+                .toList();
     }
 
     @Override
+    @Cacheable(value = "works", key = "#id")
     public Optional<WorkDto> getWorkById(UUID id) {
         return this.getAllWorks().stream()
                 .filter(work -> work.getId().equals(id))
@@ -148,15 +128,20 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
+    @Cacheable(value = "wages")
     public List<WageDto> getAllWages() {
-        return new ArrayList<>(wages);
+        List<WageEntity> allWages = wageRepository.findAll(Sort.by(Sort.Direction.ASC, "code"));
+        return allWages.stream().map(WageDto::new).toList();
     }
 
     @Override
+    @Cacheable(value = "workerHistory", key = "{#workerId, #year, #month}")
     public Optional<WorkerHistoryDto> getWorkerHistory(UUID workerId, Integer year, Integer month) {
         LocalDate date = LocalDate.of(year, month, 1);
 
-        return workersHistory.stream()
+        List<WorkerHistoryEntity> allWorkersHistory = workerHistoryRepository.findAll(Sort.by(Sort.Direction.ASC, "workerId"));
+        return allWorkersHistory.stream()
+                .map(WorkerHistoryDto::new)
                 .filter(workerHistory -> workerHistory.getWorkerId().equals(workerId))
                 .filter(workerHistory -> !workerHistory.getValidFrom().isAfter(date) &&
                         (workerHistory.getValidTo() == null || !workerHistory.getValidTo().isBefore(date))
@@ -165,11 +150,14 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
+    @Cacheable(value = "invoices")
     public List<ClientInvoiceDto> getAllClientInvoices() {
-        return new ArrayList<>(clientInvoices);
+        List<ClientInvoiceEntity> allClientInvoices = clientInvoiceRepository.findAll(Sort.by(Sort.Direction.DESC, "docNumber"));
+        return allClientInvoices.stream().map(ClientInvoiceDto::new).toList();
     }
 
     @Override
+    @Cacheable(value = "invoices", key = "#invoiceId")
     public Optional<ClientInvoiceDto> getClientInvoiceById(UUID invoiceId) {
         return this.getAllClientInvoices().stream()
                 .filter(invoice -> invoice.getId().equals(invoiceId))
@@ -177,11 +165,23 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
+    @Cacheable(value = "payments")
     public List<ClientPaymentDto> getAllClientPayments() {
-        return new ArrayList<>(clientPayments);
+        List<ClientPaymentInvoiceEntity> allPaymentInvoices = clientPaymentInvoiceRepository.findAll();
+        Map<UUID, List<ClientInvoiceEntity>> invoicesByPaymentId = allPaymentInvoices.stream()
+                .collect(Collectors.groupingBy(
+                        clientPaymentInvoice -> clientPaymentInvoice.getPayment().getId(),
+                        Collectors.mapping(ClientPaymentInvoiceEntity::getInvoice, Collectors.toList())
+                ));
+
+        List<ClientPaymentEntity> allClientPayments = clientPaymentRepository.findAll(Sort.by(Sort.Direction.DESC, "paymentDate"));
+        return allClientPayments.stream()
+                .map(payment -> new ClientPaymentDto(payment, invoicesByPaymentId.getOrDefault(payment.getId(), List.of())))
+                .toList();
     }
 
     @Override
+    @Cacheable(value = "payments", key = "#paymentId")
     public Optional<ClientPaymentDto> getClientPaymentById(UUID paymentId) {
         return this.getAllClientPayments().stream()
                 .filter(payment -> payment.getId().equals(paymentId))

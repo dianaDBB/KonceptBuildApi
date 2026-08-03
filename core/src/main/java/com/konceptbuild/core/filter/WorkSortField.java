@@ -1,17 +1,27 @@
 package com.konceptbuild.core.filter;
 
 public enum WorkSortField {
-    CODE,
-    NAME,
-    STATUS,
-    CONTRACTED_BUDGET,
-    ESTIMATED_COST,
-    ESTIMATED_COST_MATERIALS,
-    ESTIMATED_COST_LABOR,
-    ESTIMATED_MARGIN_EUR,
-    ESTIMATED_MARGIN_PERCENTUAL,
-    START_DATE,
-    ESTIMATED_END_DATE,
-    END_DATE,
-    CLIENT_NAME
+    CODE("code"),
+    NAME("name"),
+    STATUS("status"),
+    CONTRACTED_BUDGET("contractedBudget"),
+    ESTIMATED_COST("estimatedCost"),
+    ESTIMATED_COST_MATERIALS("estimatedCostMaterials"),
+    ESTIMATED_COST_LABOR("estimatedCostLabor"),
+    ESTIMATED_MARGIN_EUR("estimatedMarginEur"),
+    ESTIMATED_MARGIN_PERCENTUAL("estimatedMarginPercentual"),
+    START_DATE("startDate"),
+    ESTIMATED_END_DATE("estimatedEndDate"),
+    END_DATE("endDate"),
+    CLIENT_NAME("client.companyName");
+
+    private final String fieldName;
+
+    WorkSortField(String fieldName) {
+        this.fieldName = fieldName;
+    }
+
+    public String fieldName() {
+        return fieldName;
+    }
 }
