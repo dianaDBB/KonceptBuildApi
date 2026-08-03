@@ -65,12 +65,12 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
     @Transactional
     @Override
     public void add(CreateClientPaymentRequest request) {
-        ClientDto client = cacheService.getClientById(request.getClientId())
+        ClientDto clientDto = cacheService.getClientById(request.getClientId())
                 .orElseThrow(() -> new EntityNotFoundException("Client not found - " + request.getClientId()));
 
         ClientPaymentEntity payment = ClientPaymentEntity
                 .builder()
-                .client(new ClientEntity(client))
+                .client(new ClientEntity(clientDto))
                 .type(request.getType())
                 .paymentDate(request.getPaymentDate())
                 .paymentMethod(request.getPaymentMethod())
@@ -83,6 +83,12 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
         for (CreateClientPaymentInvoiceRequest invoiceDto : request.getInvoices()) {
             ClientInvoiceDto invoice = cacheService.getClientInvoiceById(invoiceDto.getInvoiceId())
                     .orElseThrow(() -> new EntityNotFoundException("Invoice not found - " + invoiceDto.getInvoiceId()));
+
+            if (invoice.getClient().getId() != clientDto.getId()) {
+                throw new EntityNotFoundException("Invoice " + invoice.getDocNumber() + " does not belong to the " +
+                        "selected client "
+                        + clientDto.getCode());
+            }
 
             ClientPaymentInvoiceEntity paymentInvoiceEntity = ClientPaymentInvoiceEntity
                     .builder()
@@ -120,6 +126,12 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
         for (CreateClientPaymentInvoiceRequest invoiceRequest : request.getInvoices()) {
             ClientInvoiceDto invoice = cacheService.getClientInvoiceById(invoiceRequest.getInvoiceId())
                     .orElseThrow(() -> new EntityNotFoundException("Invoice not found - " + invoiceRequest.getInvoiceId()));
+
+            if (invoice.getClient().getId() != clientDto.getId()) {
+                throw new EntityNotFoundException("Invoice " + invoice.getDocNumber() + " does not belong to the " +
+                        "selected client "
+                        + clientDto.getCode());
+            }
 
             ClientPaymentInvoiceEntity paymentInvoiceEntity = ClientPaymentInvoiceEntity
                     .builder()

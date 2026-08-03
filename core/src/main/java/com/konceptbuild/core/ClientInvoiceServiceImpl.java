@@ -65,18 +65,23 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
     @Transactional
     @Override
     public void add(CreateClientInvoiceRequest request) {
-        ClientDto client = cacheService.getClientById(request.getClientId())
+        ClientDto clientDto = cacheService.getClientById(request.getClientId())
                 .orElseThrow(() -> new EntityNotFoundException("Client not found - " + request.getClientId()));
 
         WorkDto workDto = cacheService.getWorkById(request.getWorkId())
                 .orElseThrow(() -> new EntityNotFoundException("Work not found - " + request.getWorkId()));
+
+        if (workDto.getClient().getId() != clientDto.getId()) {
+            throw new EntityNotFoundException("Work " + workDto.getCode() + " does not belong to the selected client "
+                    + clientDto.getCode());
+        }
 
         Double taxValue = request.getValueWithoutTax() * (request.getAppliedTax() / 100);
         Double totalValue = request.getValueWithoutTax() + taxValue;
         ClientInvoiceEntity invoiceEntity = ClientInvoiceEntity
                 .builder()
                 .docNumber(request.getDocNumber())
-                .client(new ClientEntity(client))
+                .client(new ClientEntity(clientDto))
                 .work(new WorkEntity(workDto))
                 .description(request.getDescription())
                 .valueWithoutTax(request.getValueWithoutTax())
@@ -99,8 +104,13 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
         ClientDto clientDto = cacheService.getClientById(request.getClientId())
                 .orElseThrow(() -> new EntityNotFoundException("Client not found - " + request.getClientId()));
 
-        WorkDto workDto = cacheService.getWorkById(request.getClientId())
-                .orElseThrow(() -> new EntityNotFoundException("Work not found - " + request.getClientId()));
+        WorkDto workDto = cacheService.getWorkById(request.getWorkId())
+                .orElseThrow(() -> new EntityNotFoundException("Work not found - " + request.getWorkId()));
+
+        if (workDto.getClient().getId() != clientDto.getId()) {
+            throw new EntityNotFoundException("Work " + workDto.getCode() + " does not belong to the selected client "
+                    + clientDto.getCode());
+        }
 
         ClientInvoiceEntity invoiceEntity = new ClientInvoiceEntity(invoiceDto);
         Double taxValue = request.getValueWithoutTax() * (request.getAppliedTax() / 100);
