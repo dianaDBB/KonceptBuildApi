@@ -68,6 +68,10 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
         ClientDto clientDto = cacheService.getClientById(request.getClientId())
                 .orElseThrow(() -> new EntityNotFoundException("Client not found - " + request.getClientId()));
 
+        if(request.getPaidInvoices().isEmpty()) {
+            throw new EntityNotFoundException("Payment must have at least one associated invoice");
+        }
+
         Double totalPaidValue = request.getPaidInvoices().stream()
                 .mapToDouble(CreateClientPaymentInvoiceRequest::getPaidValue)
                 .sum();
@@ -115,6 +119,10 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
         ClientDto clientDto = cacheService.getClientById(request.getClientId())
                 .orElseThrow(() -> new EntityNotFoundException("Client not found - " + request.getClientId()));
 
+        if(request.getPaidInvoices().isEmpty()) {
+            throw new EntityNotFoundException("Payment must have at least one associated invoice");
+        }
+
         Double totalPaidValue = request.getPaidInvoices().stream()
                 .mapToDouble(CreateClientPaymentInvoiceRequest::getPaidValue)
                 .sum();
@@ -140,6 +148,10 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
                 throw new EntityNotFoundException("Invoice " + invoice.getDocNumber() + " does not belong to the " +
                         "selected client "
                         + clientDto.getCode());
+            }
+
+            if(invoiceRequest.getPaidValue() > invoice.getTotalValue()) {
+                throw new EntityNotFoundException("Paid value (" + invoiceRequest.getPaidValue() + ") cannot be bigger than invoice total (" + invoice.getTotalValue() + ")");
             }
 
             ClientPaymentInvoiceEntity paymentInvoiceEntity = ClientPaymentInvoiceEntity
