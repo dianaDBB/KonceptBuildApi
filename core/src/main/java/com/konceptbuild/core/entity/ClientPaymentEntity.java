@@ -41,8 +41,8 @@ public class ClientPaymentEntity {
     @Column(name = "payment_date", nullable = false)
     private LocalDate paymentDate;
 
-    @Column(name = "paid_value", nullable = false, precision = 10, scale = 2)
-    private Double paidValue;
+    @Column(name = "total_paid_value", nullable = false, precision = 10, scale = 2)
+    private Double totalPaidValue;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", nullable = false)
@@ -57,7 +57,7 @@ public class ClientPaymentEntity {
         this.type = dto.getType();
         this.client = new ClientEntity(dto.getClient());
         this.paymentDate = dto.getPaymentDate();
-        this.paidValue = dto.getPaidValue();
+        this.totalPaidValue = dto.getTotalPaidValue();
         this.paymentMethod = dto.getPaymentMethod();
         this.notes = dto.getNotes();
     }

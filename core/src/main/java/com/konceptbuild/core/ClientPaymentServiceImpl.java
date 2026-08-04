@@ -55,7 +55,7 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
                         filter.client()
                 ))
                 .filter(payment -> FilterHelper.isWithinRange(payment.getPaymentDate(), filter.paymentDate()))
-                .filter(payment -> FilterHelper.isWithinRange(payment.getPaidValue(), filter.paidValue()))
+                .filter(payment -> FilterHelper.isWithinRange(payment.getTotalPaidValue(), filter.totalPaidValue()))
                 .filter(payment -> FilterHelper.matchesEnum(payment.getPaymentMethod(), filter.paymentMethod()))
                 .filter(payment -> FilterHelper.matchesString(payment.getNotes(), filter.notes()))
                 .sorted(comparator)
@@ -68,6 +68,10 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
         ClientDto clientDto = cacheService.getClientById(request.getClientId())
                 .orElseThrow(() -> new EntityNotFoundException("Client not found - " + request.getClientId()));
 
+        Double totalPaidValue = request.getPaidInvoices().stream()
+                .mapToDouble(CreateClientPaymentInvoiceRequest::getPaidValue)
+                .sum();
+
         ClientPaymentEntity payment = ClientPaymentEntity
                 .builder()
                 .client(new ClientEntity(clientDto))
@@ -75,14 +79,14 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
                 .paymentDate(request.getPaymentDate())
                 .paymentMethod(request.getPaymentMethod())
                 .notes(request.getNotes())
-                .paidValue(request.getPaidValue())
+                .totalPaidValue(totalPaidValue)
                 .build();
 
         payment = clientPaymentRepository.save(payment);
 
-        for (CreateClientPaymentInvoiceRequest invoiceDto : request.getInvoices()) {
-            ClientInvoiceDto invoice = cacheService.getClientInvoiceById(invoiceDto.getInvoiceId())
-                    .orElseThrow(() -> new EntityNotFoundException("Invoice not found - " + invoiceDto.getInvoiceId()));
+        for (CreateClientPaymentInvoiceRequest invoiceRequest : request.getPaidInvoices()) {
+            ClientInvoiceDto invoice = cacheService.getClientInvoiceById(invoiceRequest.getInvoiceId())
+                    .orElseThrow(() -> new EntityNotFoundException("Invoice not found - " + invoiceRequest.getInvoiceId()));
 
             if (invoice.getClient().getId() != clientDto.getId()) {
                 throw new EntityNotFoundException("Invoice " + invoice.getDocNumber() + " does not belong to the " +
@@ -94,6 +98,7 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
                     .builder()
                     .id(new ClientPaymentInvoiceId(payment.getId(), invoice.getId()))
                     .payment(payment).invoice(new ClientInvoiceEntity(invoice))
+                    .paidValue(invoiceRequest.getPaidValue())
                     .build();
 
             clientPaymentInvoiceRepository.save(paymentInvoiceEntity);
@@ -110,11 +115,15 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
         ClientDto clientDto = cacheService.getClientById(request.getClientId())
                 .orElseThrow(() -> new EntityNotFoundException("Client not found - " + request.getClientId()));
 
+        Double totalPaidValue = request.getPaidInvoices().stream()
+                .mapToDouble(CreateClientPaymentInvoiceRequest::getPaidValue)
+                .sum();
+
         ClientPaymentEntity paymentEntity = new ClientPaymentEntity(paymentDto);
         paymentEntity.setType(request.getType());
         paymentEntity.setClient(new ClientEntity(clientDto));
         paymentEntity.setPaymentDate(request.getPaymentDate());
-        paymentEntity.setPaidValue(request.getPaidValue());
+        paymentEntity.setTotalPaidValue(totalPaidValue);
         paymentEntity.setPaymentMethod(request.getPaymentMethod());
         paymentEntity.setNotes(request.getNotes());
         clientPaymentRepository.save(paymentEntity);
@@ -123,7 +132,7 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
         clientPaymentInvoiceRepository.deleteByPayment_Id(request.getId());
 
         // Recreate associations
-        for (CreateClientPaymentInvoiceRequest invoiceRequest : request.getInvoices()) {
+        for (CreateClientPaymentInvoiceRequest invoiceRequest : request.getPaidInvoices()) {
             ClientInvoiceDto invoice = cacheService.getClientInvoiceById(invoiceRequest.getInvoiceId())
                     .orElseThrow(() -> new EntityNotFoundException("Invoice not found - " + invoiceRequest.getInvoiceId()));
 
@@ -138,6 +147,7 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
                     .id(new ClientPaymentInvoiceId(request.getId(), invoice.getId()))
                     .payment(paymentEntity)
                     .invoice(new ClientInvoiceEntity(invoice))
+                    .paidValue(invoiceRequest.getPaidValue())
                     .build();
 
             clientPaymentInvoiceRepository.save(paymentInvoiceEntity);

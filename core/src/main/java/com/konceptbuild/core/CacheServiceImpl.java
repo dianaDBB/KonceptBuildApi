@@ -168,16 +168,12 @@ public class CacheServiceImpl implements CacheService {
     @Cacheable(value = "payments")
     public List<ClientPaymentDto> getAllClientPayments() {
         List<ClientPaymentInvoiceEntity> allPaymentInvoices = clientPaymentInvoiceRepository.findAll();
-        Map<UUID, List<ClientInvoiceEntity>> invoicesByPaymentId = allPaymentInvoices.stream()
-                .collect(Collectors.groupingBy(
-                        clientPaymentInvoice -> clientPaymentInvoice.getPayment().getId(),
-                        Collectors.mapping(ClientPaymentInvoiceEntity::getInvoice, Collectors.toList())
-                ));
+        Map<UUID, List<ClientPaymentInvoiceEntity>> paymentInvoicesByPaymentId =
+                allPaymentInvoices.stream().collect(Collectors.groupingBy(paymentInvoice -> paymentInvoice.getPayment().getId()));
 
         List<ClientPaymentEntity> allClientPayments = clientPaymentRepository.findAll(Sort.by(Sort.Direction.DESC, "paymentDate"));
-        return allClientPayments.stream()
-                .map(payment -> new ClientPaymentDto(payment, invoicesByPaymentId.getOrDefault(payment.getId(), List.of())))
-                .toList();
+        return allClientPayments.stream().map(payment -> new ClientPaymentDto(payment,
+                paymentInvoicesByPaymentId.getOrDefault(payment.getId(), List.of()))).toList();
     }
 
     @Override

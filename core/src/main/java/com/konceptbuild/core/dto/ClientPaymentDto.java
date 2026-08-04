@@ -1,7 +1,7 @@
 package com.konceptbuild.core.dto;
 
-import com.konceptbuild.core.entity.ClientInvoiceEntity;
 import com.konceptbuild.core.entity.ClientPaymentEntity;
+import com.konceptbuild.core.entity.ClientPaymentInvoiceEntity;
 import com.konceptbuild.core.enums.PaymentMethod;
 import com.konceptbuild.core.enums.ClientPaymentType;
 import lombok.AllArgsConstructor;
@@ -23,20 +23,22 @@ public class ClientPaymentDto {
     private ClientPaymentType type;
     private ClientDto client;
     private LocalDate paymentDate;
-    private Double paidValue;
+    private Double totalPaidValue;
     private PaymentMethod paymentMethod;
     private String notes;
-    private List<ClientInvoiceDto> invoices;
+    private List<ClientPaymentInvoiceDto> paidInvoices;
 
-    public ClientPaymentDto(ClientPaymentEntity entity, List<ClientInvoiceEntity> invoices) {
+    public ClientPaymentDto(ClientPaymentEntity entity, List<ClientPaymentInvoiceEntity> paidInvoices) {
         this.id = entity.getId();
         this.documentId = entity.getDocumentId();
         this.type = entity.getType();
         this.client = new ClientDto(entity.getClient());
         this.paymentDate = entity.getPaymentDate();
-        this.paidValue = entity.getPaidValue();
+        this.totalPaidValue = entity.getTotalPaidValue();
         this.paymentMethod = entity.getPaymentMethod();
         this.notes = entity.getNotes();
-        this.invoices = invoices.stream().map(ClientInvoiceDto::new).toList();
+        this.paidInvoices = paidInvoices.stream()
+                .map(ClientPaymentInvoiceDto::new)
+                .toList();
     }
 }

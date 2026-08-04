@@ -11,7 +11,7 @@ public record ClientPaymentFilter(
         ClientPaymentType type,
         String client,
         FilterHelper.RangeFilter<LocalDate> paymentDate,
-        FilterHelper.RangeFilter<Double> paidValue,
+        FilterHelper.RangeFilter<Double> totalPaidValue,
         PaymentMethod paymentMethod,
         String notes,
 

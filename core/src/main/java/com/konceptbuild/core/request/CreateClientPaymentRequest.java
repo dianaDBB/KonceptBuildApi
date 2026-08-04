@@ -21,14 +21,11 @@ public class CreateClientPaymentRequest {
     @NotNull(message = "Payment date is required")
     LocalDate paymentDate;
 
-    @NotNull(message = "Paid value is required")
-    Double paidValue;
-
     @NotNull(message = "Payment method is required")
     PaymentMethod paymentMethod;
 
     private String notes;
 
     @NotEmpty(message = "At least 1 invoice is required")
-    private List<CreateClientPaymentInvoiceRequest> invoices;
+    private List<CreateClientPaymentInvoiceRequest> paidInvoices;
 }

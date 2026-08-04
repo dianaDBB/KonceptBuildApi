@@ -24,4 +24,7 @@ public class ClientPaymentInvoiceEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_id")
     private ClientInvoiceEntity invoice;
+
+    @Column(name = "paid_value", nullable = false, precision = 10, scale = 2)
+    private Double paidValue;
 }

@@ -5,7 +5,7 @@ public enum ClientPaymentSortField {
     PAYMENT_TYPE("paymentType"),
     CLIENT("client.code"),
     PAYMENT_DATE("paymentDate"),
-    PAID_VALUE("paidValue"),
+    TOTAL_PAID_VALUE("totalPidValue"),
     PAYMENT_METHOD("paymentMethod"),
     NOTES("notes");
 
