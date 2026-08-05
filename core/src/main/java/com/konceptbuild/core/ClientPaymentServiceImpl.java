@@ -150,10 +150,6 @@ public class ClientPaymentServiceImpl implements ClientPaymentService {
                         + clientDto.getCode());
             }
 
-            if(invoiceRequest.getPaidValue() > invoice.getTotalValue()) {
-                throw new EntityNotFoundException("Paid value (" + invoiceRequest.getPaidValue() + ") cannot be bigger than invoice total (" + invoice.getTotalValue() + ")");
-            }
-
             ClientPaymentInvoiceEntity paymentInvoiceEntity = ClientPaymentInvoiceEntity
                     .builder()
                     .id(new ClientPaymentInvoiceId(request.getId(), invoice.getId()))
