@@ -1,35 +1,26 @@
 package com.konceptbuild.core.entity;
 
-import com.konceptbuild.core.dto.ClientInvoiceDto;
+import com.konceptbuild.core.dto.ClientCreditNoteDto;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "client_invoice")
+@Table(name = "client_credit_note")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClientInvoiceEntity {
+public class ClientCreditNoteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "doc_number", nullable = false)
     private String docNumber;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id")
-    private ClientEntity client;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "work_id")
-    private WorkEntity work;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -49,17 +40,16 @@ public class ClientInvoiceEntity {
     @Column(name = "registration_date", nullable = false)
     private LocalDate registrationDate;
 
-    @Column(name = "due_date", nullable = false)
+    @Column(name = "due_date")
     private LocalDate dueDate;
 
-    @OneToMany(mappedBy = "clientInvoice")
-    List<ClientCreditNoteEntity> creditNotes;
+    @ManyToOne
+    @JoinColumn(name = "client_invoice_id")
+    ClientInvoiceEntity clientInvoice;
 
-    public ClientInvoiceEntity(ClientInvoiceDto dto) {
+    public ClientCreditNoteEntity(ClientCreditNoteDto dto) {
         this.id = dto.getId();
         this.docNumber = dto.getDocNumber();
-        this.client = new ClientEntity(dto.getClient());
-        this.work = new WorkEntity(dto.getWork());
         this.description = dto.getDescription();
         this.valueWithoutTax = dto.getValueWithoutTax();
         this.appliedTax = dto.getAppliedTax();
@@ -67,15 +57,5 @@ public class ClientInvoiceEntity {
         this.totalValue = dto.getTotalValue();
         this.registrationDate = dto.getRegistrationDate();
         this.dueDate = dto.getDueDate();
-
-        if (dto.getCreditNotes() != null) {
-            this.creditNotes = dto.getCreditNotes().stream()
-                    .map(noteDto -> {
-                        ClientCreditNoteEntity note = new ClientCreditNoteEntity(noteDto);
-                        note.setClientInvoice(this);
-                        return note;
-                    })
-                    .toList();
-        }
     }
 }

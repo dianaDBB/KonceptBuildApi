@@ -5,31 +5,23 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Data
-public class CreateClientInvoiceRequest {
+public class CreateClientCreditNoteRequest {
     @NotBlank(message = "Document number is required")
-    String docNumber;
-
-    @NotNull(message = "Client ID is required")
-    UUID clientId;
-
-    @NotNull(message = "Work ID is required")
-    UUID workId;
+    private String docNumber;
 
     @NotBlank(message = "Description is required")
-    String description;
+    private String description;
 
     @NotNull(message = "Value without tax value is required")
-    Double valueWithoutTax;
+    private Double valueWithoutTax;
 
     @NotNull(message = "Applied tax value is required")
-    Double appliedTax;
+    private Double appliedTax;
 
     @NotNull(message = "Registration date is required")
-    LocalDate registrationDate;
+    private LocalDate registrationDate;
 
-    @NotNull(message = "Due date is required")
-    LocalDate dueDate;
+    private LocalDate dueDate;
 }

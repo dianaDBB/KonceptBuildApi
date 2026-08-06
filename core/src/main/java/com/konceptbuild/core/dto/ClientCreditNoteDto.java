@@ -1,24 +1,21 @@
 package com.konceptbuild.core.dto;
 
-import com.konceptbuild.core.entity.*;
+import com.konceptbuild.core.entity.ClientCreditNoteEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClientInvoiceDto {
+public class ClientCreditNoteDto {
     private UUID id;
     private String docNumber;
-    private ClientDto client;
-    private WorkDto work;
     private String description;
     private Double valueWithoutTax;
     private Double appliedTax;
@@ -26,13 +23,10 @@ public class ClientInvoiceDto {
     private Double totalValue;
     private LocalDate registrationDate;
     private LocalDate dueDate;
-    private List<ClientCreditNoteDto> creditNotes;
 
-    public ClientInvoiceDto(ClientInvoiceEntity entity) {
+    public ClientCreditNoteDto(ClientCreditNoteEntity entity) {
         this.id = entity.getId();
         this.docNumber = entity.getDocNumber();
-        this.client = new ClientDto(entity.getClient());
-        this.work = new WorkDto(entity.getWork(), this.client);
         this.description = entity.getDescription();
         this.valueWithoutTax = entity.getValueWithoutTax();
         this.appliedTax = entity.getAppliedTax();
@@ -40,10 +34,5 @@ public class ClientInvoiceDto {
         this.totalValue = entity.getTotalValue();
         this.registrationDate = entity.getRegistrationDate();
         this.dueDate = entity.getDueDate();
-        this.creditNotes = entity.getCreditNotes() == null
-                ? List.of()
-                : entity.getCreditNotes().stream()
-                .map(ClientCreditNoteDto::new)
-                .toList();
     }
 }

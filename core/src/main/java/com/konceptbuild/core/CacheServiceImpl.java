@@ -37,6 +37,9 @@ public class CacheServiceImpl implements CacheService {
     private ClientInvoiceRepository clientInvoiceRepository;
 
     @Autowired
+    private ClientCreditNoteRepository clientCreditNoteRepository;
+
+    @Autowired
     private ClientPaymentRepository clientPaymentRepository;
 
     @Autowired
@@ -50,13 +53,15 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     @Transactional(readOnly = true)
-    @CacheEvict(allEntries = true, cacheNames = {"workers", "clients", "works", "wages", "invoices", "payments", "workerHistory"})
+    @CacheEvict(allEntries = true, cacheNames = {"workers", "clients", "works", "wages", "invoices", "creditNotes",
+            "payments", "workerHistory"})
     public void refreshCache() {
         getAllWorkers();
         getAllClients();
         getAllWorks();
         getAllWages();
         getAllClientInvoices();
+        getAllClientCreditNotes();
         getAllClientPayments();
     }
 
@@ -161,6 +166,22 @@ public class CacheServiceImpl implements CacheService {
     public Optional<ClientInvoiceDto> getClientInvoiceById(UUID invoiceId) {
         return this.getAllClientInvoices().stream()
                 .filter(invoice -> invoice.getId().equals(invoiceId))
+                .findFirst();
+    }
+
+    @Override
+    @Cacheable(value = "creditNotes")
+    public List<ClientCreditNoteDto> getAllClientCreditNotes() {
+        List<ClientCreditNoteEntity> allClientCreditNotes =
+                clientCreditNoteRepository.findAll(Sort.by(Sort.Direction.DESC, "docNumber"));
+        return allClientCreditNotes.stream().map(ClientCreditNoteDto::new).toList();
+    }
+
+    @Override
+    @Cacheable(value = "creditNotes", key = "#creditNoteId")
+    public Optional<ClientCreditNoteDto> getClientCreditNoteById(UUID creditNoteId) {
+        return this.getAllClientCreditNotes().stream()
+                .filter(creditNote -> creditNote.getId().equals(creditNoteId))
                 .findFirst();
     }
 

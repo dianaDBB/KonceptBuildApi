@@ -3,7 +3,9 @@ package com.konceptbuild.adapters.rest;
 import com.konceptbuild.core.ClientInvoiceService;
 import com.konceptbuild.core.dto.ClientInvoiceDto;
 import com.konceptbuild.core.filter.ClientInvoiceFilter;
+import com.konceptbuild.core.request.CreateClientCreditNoteRequest;
 import com.konceptbuild.core.request.CreateClientInvoiceRequest;
+import com.konceptbuild.core.request.UpdateClientCreditNoteRequest;
 import com.konceptbuild.core.request.UpdateClientInvoiceRequest;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,5 +59,35 @@ public class ClientInvoiceController {
     public ResponseEntity<Void> update(@PathVariable UUID id) {
         clientInvoiceService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/{invoiceId}/credit-note")
+    @Operation(description = "Add a credit note")
+    @ApiResponse(responseCode = "200", description = "Credit note added successfully")
+    public ResponseEntity<Void> createCreditNote(
+            @PathVariable UUID invoiceId,
+            @Valid @RequestBody CreateClientCreditNoteRequest request) {
+        clientInvoiceService.addCreditNote(invoiceId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{invoiceId}/credit-note")
+    @Operation(description = "Edit an existing credit note")
+    @ApiResponse(responseCode = "200", description = "Credit note edited successfully")
+    public ResponseEntity<Void> updateCreditNote(
+            @PathVariable UUID invoiceId,
+            @Valid @RequestBody UpdateClientCreditNoteRequest request) {
+        clientInvoiceService.updateCreditNote(invoiceId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{invoiceId}/credit-note/{creditNoteId}")
+    @Operation(description = "Delete an existing credit note")
+    @ApiResponse(responseCode = "200", description = "Credit note deleted successfully")
+    public ResponseEntity<Void> deleteCreditNote(
+            @PathVariable UUID invoiceId,
+            @PathVariable UUID creditNoteId) {
+        clientInvoiceService.deleteCreditNote(invoiceId, creditNoteId);
+        return ResponseEntity.ok().build();
     }
 }

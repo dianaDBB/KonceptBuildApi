@@ -21,6 +21,7 @@ public class CacheConfig {
                 "works",
                 "wages",
                 "invoices",
+                "creditNotes",
                 "payments",
                 "workerHistory"
         );

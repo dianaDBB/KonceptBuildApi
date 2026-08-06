@@ -33,6 +33,10 @@ public interface CacheService {
 
     Optional<ClientInvoiceDto> getClientInvoiceById(UUID invoiceId);
 
+    List<ClientCreditNoteDto> getAllClientCreditNotes();
+
+    Optional<ClientCreditNoteDto> getClientCreditNoteById(UUID creditNoteId);
+
     List<ClientPaymentDto> getAllClientPayments();
 
     Optional<ClientPaymentDto> getClientPaymentById(UUID paymentID);
