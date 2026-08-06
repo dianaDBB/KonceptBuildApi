@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 public class ClientInvoiceServiceImpl implements ClientInvoiceService {
@@ -38,7 +39,14 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
         );
 
         return cacheService.getAllClientInvoices().stream()
-                .filter(invoice -> FilterHelper.matchesString(invoice.getDocNumber(), filter.docNumber()))
+                .filter(invoice -> {
+                    List<String> docNumbers = Stream.concat(
+                            Stream.of(invoice.getDocNumber()),
+                            invoice.getCreditNotes().stream().map(ClientCreditNoteDto::getDocNumber)
+                    ).toList();
+
+                    return FilterHelper.matchesString(docNumbers, filter.docNumber());
+                })
                 .filter(invoice -> FilterHelper.matchesString(
                         List.of(
                                 invoice.getClient().getCode(),
@@ -64,6 +72,26 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
                 .filter(invoice -> FilterHelper.isWithinRange(invoice.getTotalValue(), filter.totalValue()))
                 .filter(invoice -> FilterHelper.isWithinRange(invoice.getRegistrationDate(), filter.registrationDate()))
                 .filter(invoice -> FilterHelper.isWithinRange(invoice.getDueDate(), filter.dueDate()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getSumCreditNotesWithoutTax(),
+                        filter.sumCreditNotesWithoutTax()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getSumCreditNotesWithTax(),
+                        filter.sumCreditNotesWithTax()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getTotalValueNet(), filter.totalValueNet()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getTotalValueGross(), filter.totalValueGross()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getAmountReceivedWithoutTax(),
+                        filter.amountReceivedWithoutTax()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getAmountReceivedWithTax(),
+                        filter.amountReceivedWithTax()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getAmountDueWithoutTax(),
+                        filter.amountDueWithoutTax()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getAmountDueWithTax(), filter.amountDueWithTax()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getPaymentsCount(), filter.paymentsCount()))
+                .filter(invoice -> FilterHelper.matchesEnum(invoice.getStatus(), filter.status()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getDaysPastDue(), filter.daysPastDue()))
+                .filter(invoice -> FilterHelper.matchesEnum(invoice.getAging(), filter.aging()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getSettlementDate(), filter.settlementDate()))
+                .filter(invoice -> FilterHelper.isWithinRange(invoice.getDaysToPay(), filter.daysToPay()))
+
                 .sorted(comparator)
                 .toList();
     }

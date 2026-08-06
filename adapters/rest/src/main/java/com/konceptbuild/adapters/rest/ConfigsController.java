@@ -61,4 +61,18 @@ public class ConfigsController {
     public List<ClientPaymentTypeDto> getClientPaymentTypes() {
         return configsService.getClientPaymentTypes();
     }
+
+    @GetMapping("/invoice-status")
+    @Operation(description = "Returns all possible invoice status")
+    @ApiResponse(responseCode = "200", description = "Invoice status retrieved successfully")
+    public List<InvoiceStatusDto> getInvoiceStatus() {
+        return configsService.getInvoiceStatus();
+    }
+
+    @GetMapping("/aging")
+    @Operation(description = "Returns all possible aging")
+    @ApiResponse(responseCode = "200", description = "Aging retrieved successfully")
+    public List<AgingDto> getAging() {
+        return configsService.getAging();
+    }
 }

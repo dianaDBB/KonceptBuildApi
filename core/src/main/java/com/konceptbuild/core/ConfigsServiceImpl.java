@@ -2,6 +2,7 @@ package com.konceptbuild.core;
 
 import com.konceptbuild.core.dto.*;
 import com.konceptbuild.core.enums.*;
+import com.konceptbuild.core.enums.InvoiceStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -64,6 +65,26 @@ public class ConfigsServiceImpl implements ConfigsService {
     public List<ClientPaymentTypeDto> getClientPaymentTypes() {
         return Arrays.stream(ClientPaymentType.values())
                 .map(code -> ClientPaymentTypeDto.builder()
+                        .code(code.getCode())
+                        .label(code.getLabel())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    public List<InvoiceStatusDto> getInvoiceStatus() {
+        return Arrays.stream(InvoiceStatus.values())
+                .map(code -> InvoiceStatusDto.builder()
+                        .code(code.getCode())
+                        .label(code.getLabel())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    public List<AgingDto> getAging() {
+        return Arrays.stream(Aging.values())
+                .map(code -> AgingDto.builder()
                         .code(code.getCode())
                         .label(code.getLabel())
                         .build())

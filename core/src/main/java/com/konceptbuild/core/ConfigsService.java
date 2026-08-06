@@ -18,4 +18,8 @@ public interface ConfigsService {
     List<PaymentMethodDto> getPaymentMethod();
 
     List<ClientPaymentTypeDto> getClientPaymentTypes();
+
+    List<InvoiceStatusDto> getInvoiceStatus();
+
+    List<AgingDto> getAging();
 }
