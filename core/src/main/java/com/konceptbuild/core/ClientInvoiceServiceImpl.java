@@ -71,6 +71,11 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
     @Transactional
     @Override
     public void add(CreateClientInvoiceRequest request) {
+        cacheService.getClientInvoiceByDocNumber(request.getDocNumber())
+                .ifPresent(invoice -> {
+                    throw new IllegalArgumentException("Invoice already defined - " + request.getDocNumber());
+                });
+
         ClientDto clientDto = cacheService.getClientById(request.getClientId())
                 .orElseThrow(() -> new EntityNotFoundException("Client not found - " + request.getClientId()));
 
@@ -124,6 +129,7 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
 
         ClientInvoiceEntity invoiceEntity = ClientInvoiceEntity
                 .builder()
+                .id(request.getId())
                 .docNumber(request.getDocNumber())
                 .client(new ClientEntity(clientDto))
                 .work(new WorkEntity(workDto))
@@ -145,6 +151,16 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
         ClientInvoiceEntity invoice = clientInvoiceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Invoice not found - " + id));
 
+        List<ClientPaymentDto> payments = cacheService.getClientPaymentByInvoice(invoice.getId());
+        if (!payments.isEmpty()) {
+            throw new EntityNotFoundException("Cannot delete the invoice because it has associated payments.");
+        }
+
+        if (!invoice.getCreditNotes().isEmpty()) {
+            throw new EntityNotFoundException("Cannot delete the invoice because it has associated credit notes.");
+        }
+
+
         clientInvoiceRepository.delete(invoice);
         cacheService.refreshCache();
     }
@@ -160,6 +176,11 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
     @Transactional
     @Override
     public void addCreditNote(UUID invoiceId, CreateClientCreditNoteRequest request) {
+        cacheService.getClientCreditNoteByDocNumber(request.getDocNumber())
+                .ifPresent(invoice -> {
+                    throw new IllegalArgumentException("Credit note already defined - " + request.getDocNumber());
+                });
+
         ClientInvoiceDto invoiceDto = cacheService.getClientInvoiceById(invoiceId)
                 .orElseThrow(() -> new EntityNotFoundException("Invoice not found - " + invoiceId));
 
@@ -185,16 +206,17 @@ public class ClientInvoiceServiceImpl implements ClientInvoiceService {
     @Transactional
     @Override
     public void updateCreditNote(UUID invoiceId, UpdateClientCreditNoteRequest request) {
+        ClientCreditNoteDto creditNoteDto = cacheService.getClientCreditNoteById(request.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Credit note not found - " + request.getId()));
+
         ClientInvoiceDto invoiceDto = cacheService.getClientInvoiceById(invoiceId)
                 .orElseThrow(() -> new EntityNotFoundException("Invoice not found - " + invoiceId));
-
-        cacheService.getClientCreditNoteById(request.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Credit note not found - " + request.getId()));
 
         Double taxValue = getTaxValue(request.getValueWithoutTax(), request.getAppliedTax());
         Double totalValue = getTotalValue(request.getValueWithoutTax(), taxValue);
 
         ClientCreditNoteEntity creditNoteEntity = ClientCreditNoteEntity.builder()
+                .id(creditNoteDto.getId())
                 .clientInvoice(new ClientInvoiceEntity(invoiceDto))
                 .docNumber(request.getDocNumber())
                 .description(request.getDescription())

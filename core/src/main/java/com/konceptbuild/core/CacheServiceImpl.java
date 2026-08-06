@@ -158,7 +158,11 @@ public class CacheServiceImpl implements CacheService {
     @Cacheable(value = "invoices")
     public List<ClientInvoiceDto> getAllClientInvoices() {
         List<ClientInvoiceEntity> allClientInvoices = clientInvoiceRepository.findAll(Sort.by(Sort.Direction.DESC, "docNumber"));
-        return allClientInvoices.stream().map(ClientInvoiceDto::new).toList();
+
+        return allClientInvoices.stream()
+                .map(ClientInvoiceDto::new)
+                .peek(invoice -> invoice.calculateStatistics(getClientPaymentByInvoice(invoice.getId())))
+                .toList();
     }
 
     @Override
@@ -166,6 +170,14 @@ public class CacheServiceImpl implements CacheService {
     public Optional<ClientInvoiceDto> getClientInvoiceById(UUID invoiceId) {
         return this.getAllClientInvoices().stream()
                 .filter(invoice -> invoice.getId().equals(invoiceId))
+                .findFirst();
+    }
+
+    @Override
+    @Cacheable(value = "invoices", key = "#docNumber")
+    public Optional<ClientInvoiceDto> getClientInvoiceByDocNumber(String docNumber) {
+        return this.getAllClientInvoices().stream()
+                .filter(invoice -> invoice.getDocNumber().equals(docNumber))
                 .findFirst();
     }
 
@@ -182,6 +194,14 @@ public class CacheServiceImpl implements CacheService {
     public Optional<ClientCreditNoteDto> getClientCreditNoteById(UUID creditNoteId) {
         return this.getAllClientCreditNotes().stream()
                 .filter(creditNote -> creditNote.getId().equals(creditNoteId))
+                .findFirst();
+    }
+
+    @Override
+    @Cacheable(value = "creditNotes", key = "#docNumber")
+    public Optional<ClientCreditNoteDto> getClientCreditNoteByDocNumber(String docNumber) {
+        return this.getAllClientCreditNotes().stream()
+                .filter(creditNote -> creditNote.getDocNumber().equals(docNumber))
                 .findFirst();
     }
 
@@ -203,5 +223,24 @@ public class CacheServiceImpl implements CacheService {
         return this.getAllClientPayments().stream()
                 .filter(payment -> payment.getId().equals(paymentId))
                 .findFirst();
+    }
+
+    @Override
+    @Cacheable(value = "payments", key = "#invoiceId")
+    public List<ClientPaymentDto> getClientPaymentByInvoice(UUID invoiceId) {
+        List<ClientPaymentDto> allClientPayments = getAllClientPayments();
+
+        Map<UUID, List<ClientPaymentDto>> paymentsByInvoice =
+                allClientPayments.stream()
+                        .flatMap(payment -> payment.getPaidInvoices().stream()
+                                .map(paidInvoice -> Map.entry(
+                                        paidInvoice.getInvoice().getId(),
+                                        payment)))
+                        .collect(Collectors.groupingBy(
+                                Map.Entry::getKey,
+                                Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+                        ));
+
+        return paymentsByInvoice.getOrDefault(invoiceId, List.of());
     }
 }
