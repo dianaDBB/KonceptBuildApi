@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SalesDashboardRowDto {
     ClientDto client;
+    Double totalBilled;
     Double totalReceived;
     Double totalDue;
     Double totalOverdue;

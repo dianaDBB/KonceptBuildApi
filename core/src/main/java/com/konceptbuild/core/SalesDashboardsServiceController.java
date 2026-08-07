@@ -44,6 +44,10 @@ public class SalesDashboardsServiceController implements SalesDashboardsService 
                     SalesDashboardRowDto row = new SalesDashboardRowDto();
                     row.setClient(client);
 
+                    row.setTotalBilled(clientInvoices.stream()
+                            .mapToDouble(i -> Optional.ofNullable(i.getTotalValueGross()).orElse(0.0))
+                            .sum());
+
                     row.setTotalReceived(clientInvoices.stream()
                             .mapToDouble(i -> Optional.ofNullable(i.getAmountReceivedWithTax()).orElse(0.0))
                             .sum());
@@ -67,6 +71,7 @@ public class SalesDashboardsServiceController implements SalesDashboardsService 
 
                     return row;
                 })
+                .sorted(Comparator.comparing(row -> row.getClient().getCode()))
                 .toList();
 
         return SalesDashboardDto.builder()
