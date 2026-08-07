@@ -82,6 +82,33 @@ public class SalesDashboardsServiceController implements SalesDashboardsService 
                 .build();
     }
 
+    @Override
+    public SalesClientReportDto getClientReport(UUID clientId) {
+        List<ClientInvoiceDto> invoices = cacheService.getAllClientInvoicesByClientId(clientId)
+                .stream()
+                .sorted(Comparator.comparing(ClientInvoiceDto::getDocNumber))
+                .toList();
+
+        Double totalValueWithTax = invoices.stream()
+                .mapToDouble(ClientInvoiceDto::getTotalValue)
+                .sum();
+
+        Double totalValueGross = invoices.stream()
+                .mapToDouble(ClientInvoiceDto::getTotalValueGross)
+                .sum();
+
+        Double totalAmountDueWithTax = invoices.stream()
+                .mapToDouble(ClientInvoiceDto::getAmountDueWithTax)
+                .sum();
+
+        return SalesClientReportDto.builder()
+                .invoices(invoices)
+                .totalValueWithTax(totalValueWithTax)
+                .totalValueGross(totalValueGross)
+                .totalAmountDueWithTax(totalAmountDueWithTax)
+                .build();
+    }
+
     private static final Map<InvoiceStatus, Integer> STATUS_PRIORITY = Map.of(
             InvoiceStatus.PAID, 0,
             InvoiceStatus.PENDING, 1,

@@ -182,6 +182,14 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
+    @Cacheable(value = "invoices", key = "#clientId")
+    public List<ClientInvoiceDto> getAllClientInvoicesByClientId(UUID clientId) {
+        return this.getAllClientInvoices().stream()
+                .filter(invoice -> invoice.getClient().getId().equals(clientId))
+                .toList();
+    }
+
+    @Override
     @Cacheable(value = "creditNotes")
     public List<ClientCreditNoteDto> getAllClientCreditNotes() {
         List<ClientCreditNoteEntity> allClientCreditNotes =

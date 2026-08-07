@@ -35,6 +35,8 @@ public interface CacheService {
 
     Optional<ClientInvoiceDto> getClientInvoiceByDocNumber(String docNumber);
 
+    List<ClientInvoiceDto> getAllClientInvoicesByClientId(UUID clientId);
+
     List<ClientCreditNoteDto> getAllClientCreditNotes();
 
     Optional<ClientCreditNoteDto> getClientCreditNoteById(UUID creditNoteId);
