@@ -197,10 +197,12 @@ public class WorkerServiceImpl implements WorkerService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         WorkerEntity entity = workerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Worker with ID " + id + " not found"));
 
+        workerHistoryRepository.deleteByWorker(entity);
         workerRepository.delete(entity);
         cacheServiceImpl.refreshCache();
     }

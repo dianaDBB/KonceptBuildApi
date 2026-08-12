@@ -1,5 +1,6 @@
 package com.konceptbuild.core.repository;
 
+import com.konceptbuild.core.entity.WorkerEntity;
 import com.konceptbuild.core.entity.WorkerHistoryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,4 +14,6 @@ public interface WorkerHistoryRepository extends JpaRepository<WorkerHistoryEnti
     Optional<WorkerHistoryEntity> findByWorkerIdAndValidToIsNull(UUID workerId);
 
     List<WorkerHistoryEntity> findByValidToIsNull();
+
+    void deleteByWorker(WorkerEntity worker);
 }
